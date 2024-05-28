@@ -55,6 +55,7 @@ fun FandomCard(
 		onClick = {
 			TagSearchActivity.TagText = fandom.Name
 			TagSearchActivity.TagUrl.postValue(fandom.Url)
+			TagSearchActivity.UpdateData.postValue(true)
 			navController!!.navigate(Screen.TagSearchActivity.route)
 		},
 		shape = MaterialTheme.shapes.small,
@@ -63,7 +64,9 @@ fun FandomCard(
 			.height(90.dp)
 			.padding(3.dp)
 	) {
-		Column (modifier = Modifier.weight(1f).padding(10.dp, 10.dp),
+		Column (modifier = Modifier
+			.weight(1f)
+			.padding(10.dp, 10.dp),
 			verticalArrangement = Arrangement.SpaceBetween) {
 			Row (modifier = Modifier.fillMaxWidth(),
 				horizontalArrangement = Arrangement.SpaceBetween) {

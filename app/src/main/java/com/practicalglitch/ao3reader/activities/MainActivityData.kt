@@ -75,6 +75,7 @@ import com.practicalglitch.ao3reader.activities.nav.Screen
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import org.apio3.Types.Fandom
 import org.apio3.Types.WorkChapter
+import rememberForeverLazyListState
 import java.io.File
 import java.util.Locale
 
@@ -240,6 +241,7 @@ fun MainActivity(navController: NavController?) {
 				// If Library
 				if (state == 0) {
 					LazyColumn(
+						state = rememberForeverLazyListState(key = "Library"),
 						modifier = Modifier
 							.padding(vertical = 6.dp)
 					) {

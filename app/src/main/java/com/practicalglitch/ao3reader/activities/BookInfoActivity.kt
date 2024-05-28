@@ -282,8 +282,9 @@ fun BookInfo(
 								// Suppose Exists (E) and Not exists (N), in order
 								// char, rel, free
 								// First condition checks *EE, second checks ENE
- 								if((relList != "" && freeList != "") || (relList == "" && charList != "" && freeList != ""))
+ 								if((relList != "" && freeList != "") || (relList == "" && charList != "" && freeList != "")) {
 									Divider()
+								 }
 								
 								if(freeList != "") {
 									Text(text = freeList,
