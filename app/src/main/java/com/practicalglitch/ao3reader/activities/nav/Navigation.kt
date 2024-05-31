@@ -1,5 +1,6 @@
 package com.practicalglitch.ao3reader.activities.nav
 
+import SettingsActivity
 import TagSearchActivity
 import WebViewActivity
 import androidx.compose.runtime.Composable
@@ -37,6 +38,9 @@ fun Navigation() {
 		}
 		composable(route = Screen.TagSearchActivity.route) {
 			TagSearchActivity(navController)
+		}
+		composable(route = Screen.SettingsActivity.route) {
+			SettingsActivity(navController)
 		}
 	}
 }

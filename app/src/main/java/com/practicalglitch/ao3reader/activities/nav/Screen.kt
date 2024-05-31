@@ -9,4 +9,5 @@ sealed class Screen(val route: String){
 	object ChapterActivity : Screen("activity_chapter")
 	
 	object TagSearchActivity : Screen("tag_activity_search")
+	object SettingsActivity : Screen("settings_activity")
 }

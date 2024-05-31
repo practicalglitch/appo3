@@ -29,6 +29,7 @@ import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
+import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Update
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
@@ -194,8 +195,10 @@ fun MainActivity(navController: NavController?) {
 					},
 					//Double check this. What would this button do?
 					actions = {
-						IconButton(onClick = { /*TODO*/ }) {
-							Icon(Icons.Filled.Favorite, "Menu")
+						IconButton(onClick = {
+							navController!!.navigate(Screen.SettingsActivity.route)
+						}) {
+							Icon(Icons.Filled.Settings, "Menu")
 						}
 					}
 				)
