@@ -52,7 +52,7 @@ fun LibraryWorkCard(
 		onClick = {
 			NavigationData.BookInfo_work = work
 			BookInfoActivity().GetChapters(context, work)
-			navController!!.navigate(Screen.BookInfoScreen.route)
+			navController!!.navigate(Screen.BookInfoActivity.route)
 		},
 		shape = MaterialTheme.shapes.small,
 		modifier = Modifier

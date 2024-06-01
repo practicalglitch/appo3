@@ -25,7 +25,6 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Close
-import androidx.compose.material.icons.filled.Favorite
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
@@ -56,10 +55,10 @@ import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.core.view.WindowInsetsControllerCompat
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
 import com.practicalglitch.ao3reader.FileIO
+import com.practicalglitch.ao3reader.Internet
 import com.practicalglitch.ao3reader.Library
 import com.practicalglitch.ao3reader.LibraryIO
 import com.practicalglitch.ao3reader.Save
@@ -67,7 +66,6 @@ import com.practicalglitch.ao3reader.SavedWork
 import com.practicalglitch.ao3reader.Settings
 import com.practicalglitch.ao3reader.activities.Discovery.Companion.DisplayFandomList
 import com.practicalglitch.ao3reader.activities.Discovery.Companion.FandomList
-import com.practicalglitch.ao3reader.activities.Discovery.Companion.readyToSearch
 import com.practicalglitch.ao3reader.activities.composable.FandomCard
 import com.practicalglitch.ao3reader.activities.composable.NewChapterCard
 import com.practicalglitch.ao3reader.activities.nav.Navigation
@@ -130,7 +128,7 @@ class MainActivityData : ComponentActivity() {
 		if (data != null) {
 			val urlSplit = data.toString().split("/")
 			val workID = urlSplit[urlSplit.indexOf("works") + 1]
-			LibraryIO().GetWork(workID, navToWork)
+			//Internet().DownloadWorkMetadata(workID, navToWork)
 		}
 		
 		
@@ -141,11 +139,9 @@ class MainActivityData : ComponentActivity() {
 	
 	companion object {
 		var FilesDir: File? = null
-		var discover: SnapshotStateList<SavedWork> = SnapshotStateList()
 		var myLibrary: SnapshotStateList<SavedWork> = SnapshotStateList()
 		var newChapters: SnapshotStateList<WorkChapter> = SnapshotStateList()
 		var activityState = MutableLiveData<Int>(0)
-		var WindowInsetsController: WindowInsetsControllerCompat? = null
 		
 		var UpdateProgress = MutableLiveData<Int>(-1)
 		var navToWork = MutableLiveData<SavedWork?>(null)
@@ -164,22 +160,17 @@ fun MainActivity(navController: NavController?) {
 	// state 1 -> recent
 	// state 2 -> discover
 	val state by MainActivityData.activityState.observeAsState()
-	
-	// rState 0 -> Updates
-	// rState 1 -> History
-	var recentState by remember { mutableStateOf(0) }
 	val navTo by MainActivityData.navToWork.observeAsState()
 	val updateProgress by MainActivityData.UpdateProgress.observeAsState()
-	val context = LocalContext.current
+	val chapterUpdateStatus = remember { mutableStateOf(0) }
 	
 	RederTheme {
 		
 		if (navTo != null && MainActivityData.navToWork.value != null) {
 			NavigationData.BookInfo_work = navTo!!
-			Log.d("test", "test")
 			MainActivityData.navToWork.postValue(null)
 			BookInfoActivity().GetChapters(LocalContext.current, navTo!!)
-			navController!!.navigate(Screen.BookInfoScreen.route)
+			navController!!.navigate(Screen.BookInfoActivity.route)
 		}
 		
 		Scaffold (
@@ -266,10 +257,10 @@ fun MainActivity(navController: NavController?) {
 									.fillMaxWidth()
 									.padding(30.dp, 10.dp),
 								onClick = {
-									LibraryIO().UpdateAllWorks(
+									Internet().UpdateAllWorks(
 										Library().From(MainActivityData.myLibrary),
 										MainActivityData.newChapters,
-										MainActivityData.UpdateProgress
+										chapterUpdateStatus
 									)
 								}
 							) {
@@ -285,7 +276,6 @@ fun MainActivity(navController: NavController?) {
 							}
 						}
 						items(
-							
 							items = MainActivityData.newChapters.reversed()
 						) { chap -> NewChapterCard(navController, chap) }
 					}
@@ -310,7 +300,6 @@ fun MainActivity(navController: NavController?) {
 
 class Discovery{
 	companion object{
-		var readyToSearch: MutableLiveData<Boolean> = MutableLiveData(false)
 		var FandomList: MutableList<Fandom> = mutableListOf()
 		var DisplayFandomList: SnapshotStateList<Fandom> = SnapshotStateList();
 	}
@@ -323,11 +312,10 @@ fun Discovery(navController: NavController?) {
 	var query by remember { mutableStateOf("") }
 	var lastquery by remember { mutableStateOf("") }
 	var active by remember { mutableStateOf(false) }
-	//var display by remember { mutableStateOf(false) }
 	var searchHistory = remember {
 		mutableStateListOf( "_PLACEHOLDER_LIST")
 	}
-	val rts by readyToSearch.observeAsState()
+	val readyToSearch = remember { mutableStateOf(false) }
 	if(searchHistory.contains("_PLACEHOLDER_LIST") && searchHistory.size == 1) {
 		searchHistory.remove("_PLACEHOLDER_LIST");
 		val loadedSeachHistory = Save.LoadSearchHistory();
@@ -344,7 +332,7 @@ fun Discovery(navController: NavController?) {
 		SearchBar(
 			query = text,
 			onQueryChange = { text = it
-				readyToSearch.postValue(false)
+				readyToSearch.value = false
 							//display = false
 				},
 			onSearch = {
@@ -361,7 +349,7 @@ fun Discovery(navController: NavController?) {
 				Save.SaveSearchHistory(searchHistory.toTypedArray())
 				
 				// REAL stuff
-				LibraryIO().DownloadAllFandoms(FandomList, readyToSearch, true)
+				Internet().DownloadAllFandoms(FandomList, readyToSearch, true)
 			},
 			active = active,
 			onActiveChange = { active = it },
@@ -405,7 +393,7 @@ fun Discovery(navController: NavController?) {
 			}
 		}
 		
-		if(rts!!){
+		if(readyToSearch.value){
 			if(query != lastquery) {
 				DisplayFandomList.removeRange(0, DisplayFandomList.size)
 				Log.d("Search", "Starting search...")

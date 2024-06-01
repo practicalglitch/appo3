@@ -34,6 +34,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
+import com.practicalglitch.ao3reader.Internet
 import com.practicalglitch.ao3reader.LibraryIO
 import com.practicalglitch.ao3reader.SavedWork
 import com.practicalglitch.ao3reader.activities.nav.NavigationData
@@ -63,7 +64,7 @@ fun TagSearchActivity (navController: NavController?) {
 		if(updateData!!) {
 		TagSearchActivity.UpdateData.postValue(false)
 		Log.d("Search", "Downloading works of https://archiveofourown.org/tags/${url!!}/works")
-		LibraryIO().DownloadWorks(url!!, 1, TagSearchActivity.DisplayedWorks, true)
+		Internet().DownloadWorks(url!!, 1, TagSearchActivity.DisplayedWorks, true)
 		}
 	}
 	

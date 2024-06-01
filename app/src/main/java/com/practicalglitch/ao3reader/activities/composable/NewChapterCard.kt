@@ -25,9 +25,10 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.practicalglitch.ao3reader.Internet
 import com.practicalglitch.ao3reader.LibraryIO
 import com.practicalglitch.ao3reader.SavedWork
-import com.practicalglitch.ao3reader.activities.ChapterActivityData
+import com.practicalglitch.ao3reader.activities.nav.Navigator
 import com.practicalglitch.ao3reader.activities.nav.Screen
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import org.apio3.Types.WorkChapter
@@ -62,16 +63,14 @@ fun NewChapterCard(
 			isRead = true
 	
 	LaunchedEffect(!downloaded.value) {
-		LibraryIO().GetWorkMetadata(newChapter.WorkID, work, true)
+		Internet().DownloadWorkMetadata(newChapter.WorkID, work, true)
 		downloaded.value = true
 	}
 	
 	OutlinedCard(
 		onClick = {
 			if(work.value != null) {
-				ChapterActivityData().DownloadChapter(newChapter.ChapterID)
-				ChapterActivityData.Work.postValue(work.value)
-				navController!!.navigate(Screen.ChapterActivity.route)
+				Navigator.ToChapterActivity(navController!!, work.value!!, newChapter.ChapterID)
 			}
 		},
 		shape = MaterialTheme.shapes.small,

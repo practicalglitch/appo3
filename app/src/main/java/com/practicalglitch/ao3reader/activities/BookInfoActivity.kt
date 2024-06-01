@@ -68,6 +68,8 @@ import com.practicalglitch.ao3reader.activities.nav.NavigationData
 import com.practicalglitch.ao3reader.activities.nav.Screen
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import com.ireward.htmlcompose.HtmlText
+import com.practicalglitch.ao3reader.Internet
+import com.practicalglitch.ao3reader.activities.nav.Navigator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -131,13 +133,13 @@ fun WorkInfoPreview(){
 	BookInfoActivity.chapterInfoList.add(work.Work.Contents[1])
 	BookInfoActivity.chapterInfoList.add(work.Work.Contents[2])
 	RederTheme {
-		BookInfo(null, work, true)
+		BookInfoActivity(null, work, true)
 	}
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun BookInfo(
+fun BookInfoActivity(
 	navController: NavController? = null,
 	work: SavedWork, preview: Boolean = false
 ) {
@@ -458,9 +460,7 @@ fun BookInfo(
 									.background(MaterialTheme.colorScheme.background)
 									.padding(10.dp, 4.dp)
 									.clickable {
-										ChapterActivityData().DownloadChapter(chapter.ChapterID)
-										ChapterActivityData.Work.postValue(work)
-										navController!!.navigate(Screen.ChapterActivity.route)
+										Navigator.ToChapterActivity(navController!!, work, chapter.ChapterID)
 									}
 							) {
 								Text(

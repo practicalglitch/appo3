@@ -1,13 +1,13 @@
 package com.practicalglitch.ao3reader.activities.nav
 
 sealed class Screen(val route: String){
-	object LibraryScreen : Screen("library_screen")
+	object LibraryActivity : Screen("activity_library")
 	
-	object BookInfoScreen : Screen("book_info_screen")
+	object BookInfoActivity : Screen("activity_bookinfo")
 	
 	object WebViewActivity : Screen("activity_webview")
 	object ChapterActivity : Screen("activity_chapter")
 	
-	object TagSearchActivity : Screen("tag_activity_search")
-	object SettingsActivity : Screen("settings_activity")
+	object TagSearchActivity : Screen("activity_tag_search")
+	object SettingsActivity : Screen("activity_settings")
 }

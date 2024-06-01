@@ -1,7 +1,6 @@
 package com.practicalglitch.ao3reader.activities
 
 import android.content.res.Configuration
-import androidx.activity.ComponentActivity
 import androidx.activity.compose.BackHandler
 import androidx.compose.foundation.ExperimentalFoundationApi
 import androidx.compose.foundation.gestures.awaitEachGesture
@@ -40,8 +39,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.derivedStateOf
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -58,7 +55,6 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.MutableLiveData
 import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
 import com.practicalglitch.ao3reader.Library
@@ -69,6 +65,7 @@ import com.practicalglitch.ao3reader.activities.composable.ReaderSettings
 import com.practicalglitch.ao3reader.ui.theme.ArbutusSlabFontFamily
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import com.ireward.htmlcompose.HtmlText
+import com.practicalglitch.ao3reader.Internet
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
@@ -89,25 +86,6 @@ suspend fun PointerInputScope.detectTapGestureIfMatch(
 	}
 }
 
-class ChapterActivityData : ComponentActivity() {
-	fun DownloadChapter(chapterID: String) {
-		lifecycleScope.launch { DownloadChapterAsync(chapterID) }
-	}
-	
-	companion object {
-		var Work = MutableLiveData<SavedWork>()
-		var Chapter = MutableLiveData<WorkChapter>()
-		
-		suspend fun DownloadChapterAsync(chapterID: String) {
-			withContext(Dispatchers.IO) {
-				var chapter = ApiO3.DownloadSingleChapter(chapterID)
-				chapter.Body = chapter.Body.replace("\n", "\n<br>")
-				chapter.ChapterID = chapterID
-				Chapter.postValue(chapter)
-			}
-		}
-	}
-}
 
 //thx stackoverflow
 @Composable
@@ -152,61 +130,53 @@ fun BottomSheet(onDismiss: () -> Unit) {
 @Composable
 fun ChapterActivityPreview(){
 	RederTheme {
-		ChapterActivity(navController = null)
+		ChapterActivity(navController = null, SavedWork(), "")
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class, ExperimentalFoundationApi::class)
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChapterActivity(navController: NavController?) {
-	val chapter: WorkChapter? by ChapterActivityData.Chapter.observeAsState()
-	val work by ChapterActivityData.Work.observeAsState()
+fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapterId: String) {
+	val chapterId = remember { mutableStateOf(inChapterId) }
+	val chapter = remember { mutableStateOf(WorkChapter()) }
+	val work = remember { mutableStateOf(savedWork) }
+	val loaded = remember { mutableStateOf(false) }
 	val menuOpen = remember { mutableStateOf(false) }
 	
 	var prevChap: WorkChapter? = null
 	var nextChap: WorkChapter? = null
 	
-	var showSheet = remember { mutableStateOf(false) }
-	
-	/*//Log.d("test", "Hiding bars, ${navController.currentDestination.toString()}")
-	if(navController?.currentDestination?.route == Screen.ChapterActivity.route) {
-		MainActivityData.WindowInsetsController!!.hide(WindowInsetsCompat.Type.statusBars())
-		MainActivityData.WindowInsetsController!!.hide(WindowInsetsCompat.Type.navigationBars())
-	}
-	BackHandler {
-		//Log.d("test", "Showing bars.")
-		MainActivityData.WindowInsetsController!!.show(WindowInsetsCompat.Type.systemBars())
-		MainActivityData.WindowInsetsController!!.show(WindowInsetsCompat.Type.navigationBars())
-		navController!!.popBackStack()
-	}*/
-	
-	
-	// Update history
-	
-	if (chapter != null && work != null) {
-		Library.history.removeIf { it.WorkID == work!!.Work.Id }
-		Library.history.add(0, work!!.Work.Contents[chapter!!.ChapterIndex - 1])
-		LibraryIO.SaveHistory(Library.history.toTypedArray())
-	}
-	
+	val showSheet = remember { mutableStateOf(false) }
 	
 	val listState = rememberLazyListState()
 	val scope = rememberCoroutineScope()
 	
-	var isAtBottom = listState.isAtBottom()
+	val isAtBottom = listState.isAtBottom()
 	
-	LaunchedEffect(isAtBottom) {
+	if(loaded.value) {
+		// Add work to top of history
+		// Remove work if in history, and add it to the top
+		Library.history.removeIf { it.WorkID == work.value.Work.Id }
+		Library.history.add(0, work.value.Work.Contents[chapter.value.ChapterIndex - 1])
+		LibraryIO.SaveHistory(Library.history.toTypedArray())
+	}
+	
+	LaunchedEffect(!loaded.value) {
+		Internet().DownloadChapter(chapterId.value, chapter, loaded)
+	}
+	
+	
+	
+	LaunchedEffect((isAtBottom && loaded.value)) {
 		if(isAtBottom && chapter != null) {
 			//Log.d("Test", "End of chapter.")
 			// get index of the chapter in work
-			if(ChapterActivityData.Work.value!!.ReadStatus[chapter!!.ChapterID] != 100f) {
-				ChapterActivityData.Work.value!!.ReadStatus[chapter!!.ChapterID] = 100f
-				LibraryIO.SaveWorkReadStatus(work!!)
+			if(work.value.ReadStatus[chapter.value.ChapterID] != 100f) {
+				work.value.ReadStatus[chapter.value.ChapterID] = 100f
+				LibraryIO.SaveWorkReadStatus(work.value)
 			}
 		}
 	}
-	
-	val layoutResult = remember { mutableStateOf<TextLayoutResult?>(null) }
 	
 	RederTheme {
 		
@@ -227,6 +197,9 @@ fun ChapterActivity(navController: NavController?) {
 				},
 			color = Settings.Instance.ReaderBackgroundColor
 		) {
+			// If the menu isn't open and the user clicks back,
+			// First open the menu.
+			// If they click back again, it exits normally.
 			BackHandler(!menuOpen.value) {
 				menuOpen.value = !menuOpen.value
 			}
@@ -239,18 +212,17 @@ fun ChapterActivity(navController: NavController?) {
 						SelectionContainer {
 							Column(modifier = Modifier.fillMaxSize()) {
 								
-								if (chapter != null) {
-									for (i in 0 until work!!.Work.Contents.size) {
-										if (work!!.Work.Contents[i].ChapterID == chapter!!.ChapterID) {
+								if(loaded.value) {
+									// Get and set the previous and next chapter
+									for (i in 0 until work.value.Work.Contents.size) {
+										if (work.value.Work.Contents[i].ChapterID == chapter.value.ChapterID) {
 											if (i != 0)
-												prevChap = work!!.Work.Contents[i - 1]
-											if (i != work!!.Work.Contents.size - 1)
-												nextChap = work!!.Work.Contents[i + 1]
+												prevChap = work.value.Work.Contents[i - 1]
+											if (i != work.value.Work.Contents.size - 1)
+												nextChap = work.value.Work.Contents[i + 1]
 										}
 									}
-									
 								}
-								
 								
 								if (prevChap != null) {
 									OutlinedButton(
@@ -259,7 +231,8 @@ fun ChapterActivity(navController: NavController?) {
 											.padding(30.dp, 10.dp),
 										onClick = {
 											// Get previous chapter, set displayed chapter to it.
-											ChapterActivityData().DownloadChapter(prevChap!!.ChapterID)
+											chapterId.value = prevChap!!.ChapterID
+											loaded.value = false
 											scope.launch{ listState.scrollToItem(0) }
 										}
 									) {
@@ -274,14 +247,14 @@ fun ChapterActivity(navController: NavController?) {
 								}
 								
 								
-								if (chapter == null) {
+								if (!loaded.value) {
 									Text(
 										text = "Loading...",
 										color = MaterialTheme.colorScheme.onBackground,
 									)
 								} else {
 									Text(
-										text = "Ch." + chapter!!.ChapterIndex + " - " + chapter!!.Title,
+										text = "Ch." + chapter.value.ChapterIndex + " - " + chapter.value.Title,
 										color = MaterialTheme.colorScheme.onBackground,
 										textAlign = TextAlign.Center,
 										fontSize = 25.sp,
@@ -290,7 +263,7 @@ fun ChapterActivity(navController: NavController?) {
 										modifier = Modifier.padding(15.dp),
 										fontFamily = ArbutusSlabFontFamily
 									)
-									if (chapter!!.Summary != null && !chapter!!.Summary.equals("")) {
+									if (chapter.value.Summary != null && !chapter.value.Summary.equals("")) {
 										Text(
 											text = "Chapter Summary",
 											color = Settings.Instance.ReaderTextColor,
@@ -302,7 +275,7 @@ fun ChapterActivity(navController: NavController?) {
 											fontFamily = ArbutusSlabFontFamily
 										)
 										HtmlText(
-											text = chapter!!.Summary,
+											text = chapter.value.Summary,
 											style = TextStyle(
 												color = Settings.Instance.ReaderTextColor,
 												lineHeight = Settings.Instance.ReaderLineHeight.sp,
@@ -311,7 +284,7 @@ fun ChapterActivity(navController: NavController?) {
 											modifier = Modifier.padding(10.dp)
 										)
 									}
-									if (chapter!!.StartNotes != null && !chapter!!.StartNotes.equals(
+									if (chapter.value.StartNotes != null && !chapter.value.StartNotes.equals(
 											""
 										)
 									) {
@@ -326,7 +299,7 @@ fun ChapterActivity(navController: NavController?) {
 											fontFamily = ArbutusSlabFontFamily
 										)
 										HtmlText(
-											text = chapter!!.StartNotes,
+											text = chapter.value.StartNotes,
 											style = TextStyle(
 												color = Settings.Instance.ReaderTextColor,
 												lineHeight = Settings.Instance.ReaderLineHeight.sp,
@@ -337,7 +310,7 @@ fun ChapterActivity(navController: NavController?) {
 										)
 									}
 									HtmlText(
-										text = chapter!!.Body,
+										text = chapter.value.Body,
 										style = TextStyle(
 											color = Settings.Instance.ReaderTextColor,
 											lineHeight = Settings.Instance.ReaderLineHeight.sp,
@@ -345,7 +318,7 @@ fun ChapterActivity(navController: NavController?) {
 											fontFamily = ArbutusSlabFontFamily),
 										modifier = Modifier.padding(10.dp)
 									)
-									if (chapter!!.EndNotes != null && !chapter!!.EndNotes.equals("")) {
+									if (chapter.value.EndNotes != null && !chapter.value.EndNotes.equals("")) {
 										Text(
 											text = "Chapter End Notes",
 											color = Settings.Instance.ReaderTextColor,
@@ -357,7 +330,7 @@ fun ChapterActivity(navController: NavController?) {
 											fontFamily = ArbutusSlabFontFamily
 										)
 										HtmlText(
-											text = chapter!!.EndNotes,
+											text = chapter.value.EndNotes,
 											style = TextStyle(
 												color = Settings.Instance.ReaderTextColor,
 												lineHeight = Settings.Instance.ReaderLineHeight.sp,
@@ -373,7 +346,9 @@ fun ChapterActivity(navController: NavController?) {
 												.padding(30.dp, 10.dp),
 											onClick = {
 												// Set this activity to next chapter contents, jump to top of screen
-												ChapterActivityData().DownloadChapter(nextChap!!.ChapterID)
+												chapterId.value = nextChap!!.ChapterID
+												loaded.value = false
+												//Internet().DownloadChapter(chapterId.value, chapter)
 												scope.launch{ listState.scrollToItem(0) }
 											}
 										) {
@@ -403,7 +378,7 @@ fun ChapterActivity(navController: NavController?) {
 						),
 						title = {
 							Text(
-								text = chapter!!.Title,
+								text = chapter.value.Title,
 								maxLines = 1,
 								overflow = TextOverflow.Ellipsis,
 								color = Settings.Instance.ReaderTextColor)
@@ -439,7 +414,8 @@ fun ChapterActivity(navController: NavController?) {
 								IconButton(
 									onClick = {
 										// Get previous chapter, set displayed chapter to it.
-										ChapterActivityData().DownloadChapter(prevChap!!.ChapterID)
+										chapterId.value = prevChap!!.ChapterID
+										loaded.value = false
 										scope.launch{ listState.scrollToItem(0) }
 									}) {
 									Icon(
@@ -455,7 +431,8 @@ fun ChapterActivity(navController: NavController?) {
 								}
 								IconButton(onClick = {
 									// Set this activity to next chapter contents, jump to top of screen
-									ChapterActivityData().DownloadChapter(nextChap!!.ChapterID)
+									chapterId.value = nextChap!!.ChapterID
+									loaded.value = false
 									scope.launch{ listState.scrollToItem(0) }
 								}) {
 									Icon(
