@@ -63,12 +63,11 @@ import com.practicalglitch.ao3reader.FileIO
 import com.practicalglitch.ao3reader.Library
 import com.practicalglitch.ao3reader.LibraryIO
 import com.practicalglitch.ao3reader.SavedWork
-import com.practicalglitch.ao3reader.activities.composable.SwipeContainer
+import com.practicalglitch.ao3reader.activities.composable.subcomposable.SwipeContainer
 import com.practicalglitch.ao3reader.activities.nav.NavigationData
 import com.practicalglitch.ao3reader.activities.nav.Screen
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import com.ireward.htmlcompose.HtmlText
-import com.practicalglitch.ao3reader.Internet
 import com.practicalglitch.ao3reader.activities.nav.Navigator
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch

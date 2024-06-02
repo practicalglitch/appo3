@@ -1,4 +1,4 @@
-package com.practicalglitch.ao3reader.activities.composable
+package com.practicalglitch.ao3reader.activities.composable.subcomposable
 
 import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Box
