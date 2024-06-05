@@ -12,7 +12,7 @@ public class SavedWork {
 	public Work Work;
 	public HashMap<String, Float> ReadStatus = new HashMap<>();
 	
-	public boolean Saved;
+	public boolean CachedInfoOnly = false;
 	
 	
 	public int IndexOf(WorkChapter chapter) {

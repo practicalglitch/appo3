@@ -23,9 +23,11 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.practicalglitch.ao3reader.activities.nav.Navigator
 import com.practicalglitch.ao3reader.activities.nav.Screen
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import org.apio3.Types.Fandom
+import org.apio3.Types.WorkChapter
 
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark Mode")
@@ -37,7 +39,7 @@ fun FandomCardPreview() {
 	f.WorksCount = 1;
 	RederTheme {
 		Surface {
-			FandomCard(null, f)
+			FandomCard(null, f, mutableListOf())
 		}
 	}
 }
@@ -48,15 +50,17 @@ fun FandomCardPreview() {
 @Composable
 fun FandomCard(
 	navController: NavController? = null,
-	fandom: Fandom) {
+	fandom: Fandom,
+	history: MutableList<WorkChapter>) {
 	val context = LocalContext.current
 	
 	OutlinedCard(
 		onClick = {
+			// TODO: Change this to navigator!
 			TagSearchActivity.TagText = fandom.Name
 			TagSearchActivity.TagUrl.postValue(fandom.Url)
 			TagSearchActivity.UpdateData.postValue(true)
-			navController!!.navigate(Screen.TagSearchActivity.route)
+			Navigator.ToTagSearchActivity(navController!!, history)
 		},
 		shape = MaterialTheme.shapes.small,
 		modifier = Modifier

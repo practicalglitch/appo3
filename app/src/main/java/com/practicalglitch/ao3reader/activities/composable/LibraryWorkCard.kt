@@ -1,4 +1,3 @@
-
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -14,6 +13,9 @@ import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.platform.LocalConfiguration
@@ -22,11 +24,14 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.practicalglitch.ao3reader.Get
 import com.practicalglitch.ao3reader.SavedWork
 import com.practicalglitch.ao3reader.activities.BookInfoActivity
 import com.practicalglitch.ao3reader.activities.nav.NavigationData
+import com.practicalglitch.ao3reader.activities.nav.Navigator
 import com.practicalglitch.ao3reader.activities.nav.Screen
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
+import org.apio3.Types.WorkChapter
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark Mode")
 @Composable
@@ -34,7 +39,7 @@ fun LibraryCardPreview() {
 	val w = SavedWork.DummySavedWork()
 	RederTheme {
 		Surface {
-			LibraryWorkCard(null, w)
+			LibraryWorkCard(null, "", mutableListOf())
 		}
 	}
 }
@@ -44,15 +49,24 @@ fun LibraryCardPreview() {
 @Composable
 fun LibraryWorkCard(
 	navController: NavController? = null,
-	work: SavedWork
+	id: String,
+	history: MutableList<WorkChapter>
 ) {
-	val context = LocalContext.current
+	val work = remember { mutableStateOf(SavedWork()) }
+	val workLoaded = remember { mutableStateOf(false) }
+	
+	
+	LaunchedEffect(!workLoaded.value) {
+		if (id == "")
+			work.value = SavedWork.DummySavedWork() // preview
+		else
+			Get.SavedWork(id, work, workLoaded, true)
+	}
+	
 	
 	OutlinedCard(
 		onClick = {
-			NavigationData.BookInfo_work = work
-			BookInfoActivity().GetChapters(context, work)
-			navController!!.navigate(Screen.BookInfoActivity.route)
+			Navigator.ToBookInfoActivity(navController!!, work.value.Work.Id, history)
 		},
 		shape = MaterialTheme.shapes.small,
 		modifier = Modifier
@@ -73,26 +87,42 @@ fun LibraryWorkCard(
 			) {
 				Text(
 					modifier = Modifier.weight(1f),
-					text = work.Work.Title,
+					text =
+					if (workLoaded.value && work.value.Work != null)
+						work.value.Work.Title
+					else
+						"",
 					maxLines = 1,
 					overflow = TextOverflow.Ellipsis
 				)
 				Badge(containerColor = MaterialTheme.colorScheme.secondary) {
-					Text(text = work.UnreadChapters().toString())
+					Text(
+						text =
+						if (workLoaded.value && work.value.Work != null)
+							work.value.UnreadChapters().toString()
+						else
+							""
+					)
 				}
 			}
 			
 			Text(
-				text = work.FandomList(1)
+				text =
+				if (workLoaded.value && work.value.Work != null)
+					work.value.FandomList(1)
+				else ""
 			)
 			var dispTot = "?"
-			if (work.Work.ChaptersTotal != -1)
-				dispTot = work.Work.ChaptersTotal.toString()
+			if (workLoaded.value && work.value.Work != null && work.value.Work.ChaptersTotal != -1)
+				dispTot = work.value.Work.ChaptersTotal.toString()
 			
 			Text(
-				text = work.Work.ChaptersAvailable.toString() + "/" + dispTot
+				text =
+				if (workLoaded.value && work.value.Work != null)
+					work.value.Work.ChaptersAvailable.toString() + "/" + dispTot
+				else
+					""
 			)
 		}
-		
 	}
 }

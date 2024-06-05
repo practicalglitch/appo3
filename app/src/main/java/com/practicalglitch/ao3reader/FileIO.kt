@@ -64,6 +64,11 @@ class FileIO : AppCompatActivity() {
 			}
 		}
 		
+		fun ifExists(path: String, action: (String) -> Unit){
+			if(Exists(path)!!)
+				action.invoke(path)
+		}
+		
 		fun DeleteFile(path: String): Boolean{
 			return try {
 				File(fDir, path).delete()

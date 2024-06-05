@@ -42,6 +42,7 @@ import androidx.compose.material3.SearchBar
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
@@ -51,7 +52,6 @@ import androidx.compose.runtime.setValue
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
@@ -64,12 +64,13 @@ import com.practicalglitch.ao3reader.LibraryIO
 import com.practicalglitch.ao3reader.Save
 import com.practicalglitch.ao3reader.SavedWork
 import com.practicalglitch.ao3reader.Settings
+import com.practicalglitch.ao3reader.Storage
 import com.practicalglitch.ao3reader.activities.Discovery.Companion.DisplayFandomList
 import com.practicalglitch.ao3reader.activities.Discovery.Companion.FandomList
 import com.practicalglitch.ao3reader.activities.composable.FandomCard
 import com.practicalglitch.ao3reader.activities.composable.NewChapterCard
 import com.practicalglitch.ao3reader.activities.nav.Navigation
-import com.practicalglitch.ao3reader.activities.nav.NavigationData
+import com.practicalglitch.ao3reader.activities.nav.Navigator
 import com.practicalglitch.ao3reader.activities.nav.Screen
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import org.apio3.Types.Fandom
@@ -84,16 +85,10 @@ class MainActivityData : ComponentActivity() {
 		
 		super.onCreate(savedInstanceState)
 		FilesDir = applicationContext.filesDir;
-		// Apparently storing context in the companion is a memory leak
-		// 1984
 		
-		/*// add fullscreen functionality
-		WindowInsetsController =
-			WindowCompat.getInsetsController(window, window.decorView)
-		// Configure the behavior of the hidden system bars.
-		WindowInsetsController!!.systemBarsBehavior =
-			WindowInsetsControllerCompat.BEHAVIOR_SHOW_TRANSIENT_BARS_BY_SWIPE*/
-		
+		// Enable fullscreen
+		// TODO: Disable status bar + nav bar
+		// TODO: Make setting for enable/disable this work
 		enableEdgeToEdge(
 			statusBarStyle = SystemBarStyle.dark(
 				Color.TRANSPARENT
@@ -107,27 +102,13 @@ class MainActivityData : ComponentActivity() {
 		
 		Settings.SaveSettings()
 		
-		if (FileIO.Exists(LibraryIO.HistoryFileName)!!)
-			Library.history = LibraryIO.LoadHistory().toMutableList()
-		
-		if (FileIO.Exists(LibraryIO.SavedWorksFileName)!!) {
-			val myLib = LibraryIO.LoadSavedWorks()
-			for (work in myLib.works)
-				myLibrary.add(work)
-		}
-		
-		if (FileIO.Exists(LibraryIO.NewChaptersFileName)!!) {
-			val nChaps = LibraryIO.LoadNewChapters()
-			newChapters.addAll(nChaps)
-		}
-		
 		val intent: Intent = intent
 		val action: String? = intent.action
 		val data: Uri? = intent.data
 		
 		if (data != null) {
 			val urlSplit = data.toString().split("/")
-			val workID = urlSplit[urlSplit.indexOf("works") + 1]
+			openInAppWorkID = urlSplit[urlSplit.indexOf("works") + 1]
 			//Internet().DownloadWorkMetadata(workID, navToWork)
 		}
 		
@@ -139,12 +120,13 @@ class MainActivityData : ComponentActivity() {
 	
 	companion object {
 		var FilesDir: File? = null
-		var myLibrary: SnapshotStateList<SavedWork> = SnapshotStateList()
-		var newChapters: SnapshotStateList<WorkChapter> = SnapshotStateList()
-		var activityState = MutableLiveData<Int>(0)
+		var openInAppWorkID: String = ""
+		//var myLibrary: SnapshotStateList<SavedWork> = SnapshotStateList()
+		//var newChapters: SnapshotStateList<WorkChapter> = SnapshotStateList()
+		//var activityState = MutableLiveData<Int>(0)
 		
-		var UpdateProgress = MutableLiveData<Int>(-1)
-		var navToWork = MutableLiveData<SavedWork?>(null)
+		//var UpdateProgress = MutableLiveData<Int>(-1)
+		//var navToWork = MutableLiveData<SavedWork?>(null)
 	}
 	
 }
@@ -159,20 +141,46 @@ fun MainActivity(navController: NavController?) {
 	// state 0 -> library
 	// state 1 -> recent
 	// state 2 -> discover
-	val state by MainActivityData.activityState.observeAsState()
-	val navTo by MainActivityData.navToWork.observeAsState()
-	val updateProgress by MainActivityData.UpdateProgress.observeAsState()
+	val activityState = remember { mutableStateOf(0) }
+	//val navTo by MainActivityData.navToWork.observeAsState()
+	val updateProgress = remember { mutableStateOf(-1) }
 	val chapterUpdateStatus = remember { mutableStateOf(0) }
+	val savedWorkIDs = remember { mutableListOf<String>() }
+	val newChapters = remember { mutableListOf<WorkChapter>() }
+	val history = remember { mutableListOf<WorkChapter>() }
+	
+	val bootup = remember { mutableStateOf(false) }
+	
+	if(!bootup.value){
+		
+		// Load saved work ids an
+		Storage.LoadSavedWorkIDs()
+		Storage.SavedWorkIDs.forEach { savedWorkIDs.add(it) }
+		
+		// Load in history
+		if (FileIO.Exists(LibraryIO.HistoryFileName)!!)
+			history.addAll( LibraryIO.LoadHistory() )
+		
+		// Load in new chapters
+		if (FileIO.Exists(LibraryIO.NewChaptersFileName)!!)
+			newChapters.addAll( LibraryIO.LoadNewChapters() )
+		
+		
+		bootup.value = true
+	}
+	
+	LaunchedEffect(MainActivityData.openInAppWorkID != "") {
+		if (MainActivityData.openInAppWorkID != "") {
+			Log.d("debug", "Workid:${MainActivityData.openInAppWorkID}")
+			Navigator.ToBookInfoActivity(navController!!,
+				MainActivityData.openInAppWorkID,
+				history)
+			MainActivityData.openInAppWorkID = ""
+		}
+	}
+	
 	
 	RederTheme {
-		
-		if (navTo != null && MainActivityData.navToWork.value != null) {
-			NavigationData.BookInfo_work = navTo!!
-			MainActivityData.navToWork.postValue(null)
-			BookInfoActivity().GetChapters(LocalContext.current, navTo!!)
-			navController!!.navigate(Screen.BookInfoActivity.route)
-		}
-		
 		Scaffold (
 			topBar = {
 				CenterAlignedTopAppBar(
@@ -201,31 +209,30 @@ fun MainActivity(navController: NavController?) {
 						icon = { Icon(Icons.AutoMirrored.Filled.LibraryBooks, "Library") },
 						label = { Text("Library") },
 						onClick = {
-							if (state != 0) {
-								MainActivityData.activityState.value = 0
-							}
+							if (activityState.value != 0)
+								activityState.value = 0
 						}
 					)
 					NavigationBarItem(
 						selected = true,
 						icon = { Icon(Icons.Default.Update, "Updates") },
 						label = { Text("Updates") },
-						onClick = { MainActivityData.activityState.value = 1 }
+						onClick = { activityState.value = 1 }
 					)
 					NavigationBarItem(
 						selected = true,
 						icon = { Icon(Icons.Default.History, "History") },
 						label = { Text("History") },
-						onClick = { MainActivityData.activityState.value = 3 }
+						onClick = { activityState.value = 3 }
 					)
 					NavigationBarItem(
 						selected = true,
 						icon = { Icon(Icons.Default.Search, "Discover") },
 						label = { Text("Discover") },
 						onClick = {
-							if (state != 2) {
-								MainActivityData.activityState.value = 2
-							}
+							if (activityState.value != 2)
+								activityState.value = 2
+							
 						}
 					)
 				}
@@ -233,20 +240,19 @@ fun MainActivity(navController: NavController?) {
 		) {
 			Box (Modifier.padding(it)) {
 				// If Library
-				if (state == 0) {
+				if (activityState.value == 0) {
 					LazyColumn(
 						state = rememberForeverLazyListState(key = "Library"),
 						modifier = Modifier
 							.padding(vertical = 6.dp)
 					) {
 						items(
-							items =
-								MainActivityData.myLibrary
-						) { work -> LibraryWorkCard(navController, work) }
+							items = savedWorkIDs
+						) { workId -> LibraryWorkCard(navController, workId, history) }
 					}
 				}
 				// If Recents
-				if (state == 1) {
+				if (activityState.value == 1) {
 					LazyColumn(
 						modifier = Modifier
 							.padding(vertical = 6.dp)
@@ -257,40 +263,39 @@ fun MainActivity(navController: NavController?) {
 									.fillMaxWidth()
 									.padding(30.dp, 10.dp),
 								onClick = {
-									Internet().UpdateAllWorks(
-										Library().From(MainActivityData.myLibrary),
-										MainActivityData.newChapters,
+									Internet().UpdateSavedWorks(
+										newChapters,
 										chapterUpdateStatus
 									)
 								}
 							) {
 								Text(
 									text =
-									if (updateProgress!! == -1)
+									if (updateProgress.value == -1)
 										"Update Library"
-									else if (updateProgress!! == MainActivityData.myLibrary.size)
+									else if (updateProgress.value == savedWorkIDs.size)
 										"Update finished"
 									else
-										"Updating ${updateProgress}/${MainActivityData.myLibrary.size}"
+										"Updating ${updateProgress}/${savedWorkIDs.size}"
 								)
 							}
 						}
 						items(
-							items = MainActivityData.newChapters.reversed()
-						) { chap -> NewChapterCard(navController, chap) }
+							items = newChapters.reversed()
+						) { chap -> NewChapterCard(navController, chap, history) }
 					}
 				}
-				if (state == 2) {
-					Discovery(navController = navController)
+				if (activityState.value == 2) {
+					Discovery(navController, history)
 				}
-				if(state == 3){
+				if(activityState.value == 3){
 					LazyColumn(
 						modifier = Modifier
 							.padding(vertical = 6.dp)
 					) {
 						items(
-							items = Library.history
-						) { chap -> NewChapterCard(navController, chap) }
+							items = history
+						) { chap -> NewChapterCard(navController, chap, history) }
 					}
 				}
 			}
@@ -307,7 +312,10 @@ class Discovery{
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun Discovery(navController: NavController?) {
+fun Discovery(
+	navController: NavController?,
+	history: MutableList<WorkChapter>
+) {
 	var text by remember { mutableStateOf("") }
 	var query by remember { mutableStateOf("") }
 	var lastquery by remember { mutableStateOf("") }
@@ -424,7 +432,7 @@ fun Discovery(navController: NavController?) {
 			) {
 				items(
 					items = DisplayFandomList
-				) { fandom -> FandomCard(navController, fandom) }
+				) { fandom -> FandomCard(navController, fandom, history) }
 			}
 		}
 	}
@@ -436,7 +444,7 @@ fun DiscoveryPreview(){
 	RederTheme {
 		Surface {
 			Box(modifier = Modifier.fillMaxSize()){
-				Discovery(navController = null)
+				Discovery(null, mutableListOf())
 			}
 		}
 	}

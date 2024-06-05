@@ -31,7 +31,7 @@ class Library {
 		}
 		
 		// History tab info
-		var history: MutableList<WorkChapter> = mutableListOf()
+		//var history: MutableList<WorkChapter> = mutableListOf()
 	}
 	
 	val works: MutableList<SavedWork> = mutableListOf()
@@ -112,6 +112,7 @@ class LibraryIO : ComponentActivity() {
 			return "chapter_${cId}.json"
 		}
 		
+		/*
 		fun SaveSavedWorks(library: Library): Boolean{
 			
 			val removeWorkChapters: ExclusionStrategy = SpecificClassExclusionStrategy(WorkChapter::class.java)
@@ -125,7 +126,7 @@ class LibraryIO : ComponentActivity() {
 			Log.d("LibIO", "Saving my library")
 			
 			return FileIO.SaveToFile("", SavedWorksFileName, json)
-		}
+		}*/
 		
 		fun SaveNewChapters(chapters: Array<WorkChapter>): Boolean {
 			val json = gson.toJson(chapters)
@@ -151,6 +152,7 @@ class LibraryIO : ComponentActivity() {
 			return gson.fromJson(json, object : TypeToken<Array<WorkChapter>>() {}.type)
 		}
 		
+		/*
 		fun SaveWorkMetadata(savedWork: SavedWork): Boolean{
 			val chapterMetadatas: MutableList<WorkChapter> = mutableListOf()
 			for(content in savedWork.Work.Contents) {
@@ -171,8 +173,9 @@ class LibraryIO : ComponentActivity() {
 				WorkChapterDataPath(savedWork.Work.Id),
 				WorkChapterMetadataFileName(),
 				json)
-		}
+		}*/
 		
+		/*
 		fun SaveWorkReadStatus(savedWork: SavedWork): Boolean {
 			Log.d("LibIO", "Saving Read Data")
 			val jsonRS = Gson().toJson(savedWork.ReadStatus)
@@ -180,8 +183,8 @@ class LibraryIO : ComponentActivity() {
 				WorkChapterDataPath(savedWork.Work.Id),
 				WorkChapterReadStatusFileName(),
 				jsonRS)
-		}
-		
+		}*/
+		/*
 		fun LoadWorkReadStatus(workID: String): HashMap<String, Float> {
 			Log.d("LibIO", "Loading Read Data")
 			val json = FileIO.ReadFromFile(
@@ -189,8 +192,8 @@ class LibraryIO : ComponentActivity() {
 				WorkChapterReadStatusFileName())
 			return gson.fromJson(json, object : TypeToken<HashMap<String, Float>>() {}.type)
 		}
-		
-		
+		*/
+		/*
 		fun SaveWorkChapter(workChapter: WorkChapter): Boolean {
 			Log.d("LibIO", "Saving work chapter")
 			val json = Gson().toJson(workChapter)
@@ -205,7 +208,8 @@ class LibraryIO : ComponentActivity() {
 			val json = FileIO.ReadFromFile(SavedWorksFileName)
 			return gson.fromJson(json, object : TypeToken<Library>() {}.type)
 		}
-		
+		*/
+		/*
 		fun LoadWorkMetadata(workID: String): Array<WorkChapter> {
 			Log.d("LibIO", "Loading work chapter metadata")
 			val json = FileIO.ReadFromFile(
@@ -223,5 +227,6 @@ class LibraryIO : ComponentActivity() {
 			)
 			return gson.fromJson(json, object : TypeToken<WorkChapter>() {}.type)
 		}
+		*/
 	}
 }

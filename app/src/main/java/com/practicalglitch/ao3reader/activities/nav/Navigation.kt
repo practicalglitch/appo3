@@ -14,26 +14,32 @@ import com.practicalglitch.ao3reader.activities.ChapterActivity
 import com.practicalglitch.ao3reader.activities.MainActivity
 import org.apio3.Types.WorkChapter
 
-class NavigationData(){
+class NavigationData {
 	companion object {
-		var BookInfo_work: SavedWork = SavedWork();
+		var BookInfo_workId: String = ""
+		var BookInfo_history: MutableList<WorkChapter> = mutableListOf()
 		
 		var WebViewActivity_url: String = ""
 		
 		var ChapterActivity_savedWork: SavedWork = SavedWork()
 		var ChapterActivity_chapterId: String = ""
+		var ChapterActivity_history: MutableList<WorkChapter> = mutableListOf()
+		
+		var TagSearch_history: MutableList<WorkChapter> = mutableListOf()
 	}
 }
 
-class Navigator(){
+class Navigator {
 	companion object{
-		fun ToBookInfoActivity(navController: NavController, savedWork: SavedWork){
-			NavigationData.BookInfo_work = savedWork
+		fun ToBookInfoActivity(navController: NavController, workId: String, history: MutableList<WorkChapter>){
+			NavigationData.BookInfo_workId = workId
+			NavigationData.BookInfo_history = history
 			navController.navigate(Screen.BookInfoActivity.route)
 		}
-		fun ToChapterActivity(navController: NavController, savedWork: SavedWork, chapterId: String){
+		fun ToChapterActivity(navController: NavController, savedWork: SavedWork, chapterId: String, history: MutableList<WorkChapter>){
 			NavigationData.ChapterActivity_savedWork = savedWork
 			NavigationData.ChapterActivity_chapterId = chapterId
+			NavigationData.ChapterActivity_history = history
 			navController.navigate(Screen.ChapterActivity.route)
 		}
 		
@@ -42,7 +48,8 @@ class Navigator(){
 			navController.navigate(Screen.WebViewActivity.route)
 		}
 		
-		fun ToTagSearchActivity(navController: NavController){
+		fun ToTagSearchActivity(navController: NavController, history: MutableList<WorkChapter>){
+			NavigationData.TagSearch_history = history
 			navController.navigate(Screen.TagSearchActivity.route)
 		}
 		
@@ -60,16 +67,22 @@ fun Navigation() {
 			MainActivity(navController = navController)
 		}
 		composable(route = Screen.BookInfoActivity.route) {
-			BookInfoActivity(navController, NavigationData.BookInfo_work)
+			BookInfoActivity(navController,
+				NavigationData.BookInfo_workId,
+				NavigationData.BookInfo_history
+			)
 		}
 		composable(route = Screen.ChapterActivity.route) {
-			ChapterActivity(navController, NavigationData.ChapterActivity_savedWork, NavigationData.ChapterActivity_chapterId)
+			ChapterActivity(navController,
+				NavigationData.ChapterActivity_savedWork,
+				NavigationData.ChapterActivity_chapterId,
+				NavigationData.ChapterActivity_history)
 		}
 		composable(route = Screen.WebViewActivity.route) {
 			WebViewActivity(NavigationData.WebViewActivity_url)
 		}
 		composable(route = Screen.TagSearchActivity.route) {
-			TagSearchActivity(navController)
+			TagSearchActivity(navController, NavigationData.TagSearch_history)
 		}
 		composable(route = Screen.SettingsActivity.route) {
 			SettingsActivity(navController)

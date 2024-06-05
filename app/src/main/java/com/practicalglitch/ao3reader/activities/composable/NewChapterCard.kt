@@ -25,11 +25,9 @@ import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
-import com.practicalglitch.ao3reader.Internet
-import com.practicalglitch.ao3reader.LibraryIO
+import com.practicalglitch.ao3reader.Get
 import com.practicalglitch.ao3reader.SavedWork
 import com.practicalglitch.ao3reader.activities.nav.Navigator
-import com.practicalglitch.ao3reader.activities.nav.Screen
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import org.apio3.Types.WorkChapter
 
@@ -41,7 +39,7 @@ fun NewChapterCardPreview() {
 	val ch = w.Work.Contents[2]
 	RederTheme {
 		Surface {
-			NewChapterCard(null, ch)
+			NewChapterCard(null, ch, mutableListOf())
 		}
 	}
 }
@@ -52,26 +50,25 @@ fun NewChapterCardPreview() {
 @Composable
 fun NewChapterCard(
 	navController: NavController? = null,
-	newChapter: WorkChapter) {
+	newChapter: WorkChapter,
+	history: MutableList<WorkChapter>) {
 	val context = LocalContext.current
-	val downloaded = remember { mutableStateOf(false) }
-	val work = remember { mutableStateOf<SavedWork?>(null) }
+	val workLoaded = remember { mutableStateOf(false) }
+	val work = remember { mutableStateOf(SavedWork()) }
 	
 	var isRead = false
-	if(work.value?.ReadStatus?.get(newChapter.ChapterID) != null)
-		if(work.value!!.ReadStatus[newChapter.ChapterID]!! >= 100f)
+	if(workLoaded.value && work.value.ReadStatus?.get(newChapter.ChapterID) != null)
+		if(work.value.ReadStatus[newChapter.ChapterID]!! >= 100f)
 			isRead = true
 	
-	LaunchedEffect(!downloaded.value) {
-		Internet().DownloadWorkMetadata(newChapter.WorkID, work, true)
-		downloaded.value = true
+	LaunchedEffect(!workLoaded.value) {
+		Get.SavedWork(newChapter.WorkID, work, workLoaded, true)
 	}
 	
 	OutlinedCard(
 		onClick = {
-			if(work.value != null) {
-				Navigator.ToChapterActivity(navController!!, work.value!!, newChapter.ChapterID)
-			}
+			if(workLoaded.value)
+				Navigator.ToChapterActivity(navController!!, work.value, newChapter.ChapterID, history)
 		},
 		shape = MaterialTheme.shapes.small,
 		modifier = Modifier
@@ -85,7 +82,7 @@ fun NewChapterCard(
 				verticalArrangement = Arrangement.SpaceBetween) {
 				Row (modifier = Modifier.fillMaxWidth(),
 					horizontalArrangement = Arrangement.SpaceBetween) {
-					Text(text = if(work.value != null) work.value!!.Work.Title else "",
+					Text(text = if(workLoaded.value) work.value.Work.Title else "",
 						color = if(isRead) Color.Gray else Color.White)
 					Text(
 						text = if(newChapter.UploadDate != null) newChapter.UploadDate.toString() else "",
@@ -95,7 +92,7 @@ fun NewChapterCard(
 				}
 				
 				Text(
-					text = if(work.value != null) work.value!!.FandomList(1) else "",
+					text = if(workLoaded.value) work.value.FandomList(1) else "",
 					color = if(isRead) Color.Gray else Color.White
 				)
 				Text(

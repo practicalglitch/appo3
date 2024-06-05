@@ -70,6 +70,7 @@ import com.practicalglitch.ao3reader.ui.theme.ArbutusSlabFontFamily
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import com.ireward.htmlcompose.HtmlText
 import com.practicalglitch.ao3reader.Internet
+import com.practicalglitch.ao3reader.Storage
 import com.practicalglitch.ao3reader.activities.composable.subcomposable.DefaultScrollSettings
 import kotlinx.coroutines.launch
 import my.nanihadesuka.compose.ColumnScrollbar
@@ -133,13 +134,13 @@ fun BottomSheet(onDismiss: () -> Unit) {
 @Composable
 fun ChapterActivityPreview(){
 	RederTheme {
-		ChapterActivity(navController = null, SavedWork(), "")
+		ChapterActivity(navController = null, SavedWork(), "", mutableListOf())
 	}
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapterId: String) {
+fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapterId: String, historyChapters: MutableList<WorkChapter>) {
 	val chapterId = remember { mutableStateOf(inChapterId) }
 	val chapter = remember { mutableStateOf(WorkChapter()) }
 	val work = remember { mutableStateOf(savedWork) }
@@ -159,9 +160,9 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 	if(loaded.value) {
 		// Add work to top of history
 		// Remove work if in history, and add it to the top
-		Library.history.removeIf { it.WorkID == work.value.Work.Id }
-		Library.history.add(0, work.value.Work.Contents[chapter.value.ChapterIndex - 1])
-		LibraryIO.SaveHistory(Library.history.toTypedArray())
+		historyChapters.removeIf { it.WorkID == work.value.Work.Id }
+		historyChapters.add(0, work.value.Work.Contents[chapter.value.ChapterIndex - 1])
+		LibraryIO.SaveHistory(historyChapters.toTypedArray())
 	}
 	
 	LaunchedEffect(!loaded.value) {
@@ -176,7 +177,8 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 			// get index of the chapter in work
 			if(work.value.ReadStatus[chapter.value.ChapterID] != 100f) {
 				work.value.ReadStatus[chapter.value.ChapterID] = 100f
-				LibraryIO.SaveWorkReadStatus(work.value)
+				Storage.SaveReadStatus(work.value)
+				//LibraryIO.SaveWorkReadStatus(work.value)
 			}
 		}
 	}
@@ -466,11 +468,12 @@ fun ChapterActivityMenu(
 						)
 					}
 				})
-			LinearProgressIndicator(
-				modifier = Modifier.fillMaxWidth(),
-				color = MaterialTheme.colorScheme.tertiary,
-				progress = { scrollState.value.toFloat() / scrollState.maxValue.toFloat() }
-			)
+			if(scrollState.maxValue != 0)
+				LinearProgressIndicator(
+					modifier = Modifier.fillMaxWidth(),
+					color = MaterialTheme.colorScheme.tertiary,
+					progress = { scrollState.value.toFloat() / scrollState.maxValue.toFloat() }
+				)
 		}
 		
 		// Bottom bar
