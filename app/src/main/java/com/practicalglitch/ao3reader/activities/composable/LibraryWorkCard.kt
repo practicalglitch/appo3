@@ -55,10 +55,11 @@ fun LibraryWorkCard(
 	val work = remember { mutableStateOf(SavedWork()) }
 	val workLoaded = remember { mutableStateOf(false) }
 	
-	
 	LaunchedEffect(!workLoaded.value) {
-		if (id == "")
+		if (id == "") {
 			work.value = SavedWork.DummySavedWork() // preview
+			workLoaded.value = true
+			}
 		else
 			Get.SavedWork(id, work, workLoaded, true)
 	}
@@ -71,7 +72,7 @@ fun LibraryWorkCard(
 		shape = MaterialTheme.shapes.small,
 		modifier = Modifier
 			.width(LocalConfiguration.current.screenWidthDp.dp)
-			.height(90.dp)
+			.height(100.dp)
 			.padding(3.dp)
 	) {
 		Column(
