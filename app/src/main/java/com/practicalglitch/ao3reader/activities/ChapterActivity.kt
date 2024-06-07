@@ -461,7 +461,7 @@ fun ChapterActivityMenu(
 					titleContentColor = MaterialTheme.colorScheme.primary,
 				),
 				title = {
-					Column() {
+					Column {
 						Text(
 							text = chapter.value.Title,
 							maxLines = 1,
@@ -479,7 +479,10 @@ fun ChapterActivityMenu(
 					
 				},
 				navigationIcon = {
-					IconButton(onClick = { navController!!.popBackStack() }) {
+					IconButton(onClick = {
+						Storage.SaveStatistics()
+						navController!!.popBackStack()
+					}) {
 						Icon(
 							imageVector = Icons.Filled.ArrowBack,
 							contentDescription = "Back"
