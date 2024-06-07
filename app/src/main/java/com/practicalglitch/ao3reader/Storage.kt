@@ -31,7 +31,7 @@ class WorkBotMeta(work: Work) {
 	var fandomloc: Array<String> = work.FandomsLoc
 	var sum: String = work.Summary
 	var pub: String = work.DatePublished
-	var updte: String = work.DateUpdated
+	var updte: String? = work.DateUpdated
 	var chavail = work.ChaptersAvailable
 	var chtot = work.ChaptersTotal
 	var word = work.Words
@@ -166,38 +166,47 @@ class Storage {
 			work.Work = Work()
 			work.Work.Id = id
 			
-			val topjson = FileIO.ReadFromFile("work_${id}/top_meta.json")
-			val topMeta: WorkTopMeta =
-				LibraryIO.gson.fromJson(topjson, object : TypeToken<WorkTopMeta>() {}.type)
-			topMeta.Fill(work.Work)
 			
-			val botjson = FileIO.ReadFromFile("work_${id}/bot_meta.json")
-			val botMeta: WorkBotMeta =
-				LibraryIO.gson.fromJson(botjson, object : TypeToken<WorkBotMeta>() {}.type)
-			botMeta.Fill(work.Work)
-			
-			val chreadjson = FileIO.ReadFromFile("work_${id}/ch_read.json")
-			val chreadData: HashMap<String, Float> = LibraryIO.gson.fromJson(
-				chreadjson,
-				object : TypeToken<HashMap<String, Float>>() {}.type
-			)
-			work.ReadStatus = chreadData
-			
-			val chmetajson = FileIO.ReadFromFile("work_${id}/ch_meta.json")
-			val chmetaData: Array<ChapterMeta> = LibraryIO.gson.fromJson(
-				chmetajson,
-				object : TypeToken<Array<ChapterMeta>>() {}.type
-			)
-			
-			val chapterOut = mutableListOf<WorkChapter>()
-			
-			chmetaData.forEach {
-				val wc = WorkChapter()
-				wc.WorkID = work.Work.Id
-				it.Fill(wc)
-				chapterOut.add(wc)
+			FileIO.ifExists("work_${id}/top_meta.json") { path ->
+				val topjson = FileIO.ReadFromFile(path)
+				val topMeta: WorkTopMeta =
+					LibraryIO.gson.fromJson(topjson, object : TypeToken<WorkTopMeta>() {}.type)
+				topMeta.Fill(work.Work)
 			}
-			work.Work.Contents = chapterOut.toTypedArray()
+			
+			FileIO.ifExists("work_${id}/bot_meta.json") { path ->
+				val botjson = FileIO.ReadFromFile(path)
+				val botMeta: WorkBotMeta =
+					LibraryIO.gson.fromJson(botjson, object : TypeToken<WorkBotMeta>() {}.type)
+				botMeta.Fill(work.Work)
+			}
+			
+			FileIO.ifExists("work_${id}/ch_read.json") { path ->
+				val chreadjson = FileIO.ReadFromFile(path)
+				val chreadData: HashMap<String, Float> = LibraryIO.gson.fromJson(
+					chreadjson,
+					object : TypeToken<HashMap<String, Float>>() {}.type
+				)
+				work.ReadStatus = chreadData
+			}
+			
+			FileIO.ifExists("work_${id}/ch_meta.json") { path ->
+				val chmetajson = FileIO.ReadFromFile(path)
+				val chmetaData: Array<ChapterMeta> = LibraryIO.gson.fromJson(
+					chmetajson,
+					object : TypeToken<Array<ChapterMeta>>() {}.type
+				)
+				
+				val chapterOut = mutableListOf<WorkChapter>()
+				
+				chmetaData.forEach {
+					val wc = WorkChapter()
+					wc.WorkID = work.Work.Id
+					it.Fill(wc)
+					chapterOut.add(wc)
+				}
+				work.Work.Contents = chapterOut.toTypedArray()
+			}
 			CachedWorks.add(work)
 			return work
 		}
@@ -266,6 +275,25 @@ class Storage {
 			
 			CachedWorks.add(work)
 			return work
+		}
+		
+		var Stats = Statistics()
+		fun SaveStatistics(){
+			FileIO.SaveToFile(
+				"",
+				"stats.json",
+				LibraryIO.gson.toJson(Stats)
+			)
+		}
+		
+		fun LoadStatistics(){
+			FileIO.ifExists("stats.json") { path ->
+				val statsRaw = FileIO.ReadFromFile(path)
+				Stats = LibraryIO.gson.fromJson(
+					statsRaw,
+					object : TypeToken<Statistics>() {}.type
+				)
+			}
 		}
 	}
 }

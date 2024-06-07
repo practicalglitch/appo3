@@ -165,6 +165,8 @@ fun MainActivity(navController: NavController?) {
 		if (FileIO.Exists(LibraryIO.NewChaptersFileName)!!)
 			newChapters.addAll( LibraryIO.LoadNewChapters() )
 		
+		Storage.LoadStatistics()
+		
 		
 		bootup.value = true
 	}

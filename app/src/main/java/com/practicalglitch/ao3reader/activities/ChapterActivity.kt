@@ -70,11 +70,14 @@ import com.practicalglitch.ao3reader.ui.theme.ArbutusSlabFontFamily
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import com.ireward.htmlcompose.HtmlText
 import com.practicalglitch.ao3reader.Internet
+import com.practicalglitch.ao3reader.Statistics
 import com.practicalglitch.ao3reader.Storage
 import com.practicalglitch.ao3reader.activities.composable.subcomposable.DefaultScrollSettings
+import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import my.nanihadesuka.compose.ColumnScrollbar
 import org.apio3.Types.WorkChapter
+import kotlin.time.Duration.Companion.seconds
 
 
 suspend fun PointerInputScope.detectTapGestureIfMatch(
@@ -165,20 +168,30 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 		LibraryIO.SaveHistory(historyChapters.toTypedArray())
 	}
 	
+	// Downloads chapter
 	LaunchedEffect(!loaded.value) {
 		Internet().DownloadChapter(chapterId.value, chapter, loaded)
 	}
 	
+	// Records seconds read timer
+	LaunchedEffect(Unit) {
+		while(Settings.Instance.GeneralStatsEnabled){
+			delay(1.seconds)
+			Storage.Stats.SecondsRead++
+		}
+	}
 	
-	
-	LaunchedEffect((isAtBottom && loaded.value)) {
-		if(isAtBottom && chapter != null) {
+	// Handle if reach end of chapter
+	LaunchedEffect(isAtBottom) {
+		if(isAtBottom && loaded.value) {
 			//Log.d("Test", "End of chapter.")
 			// get index of the chapter in work
-			if(work.value.ReadStatus[chapter.value.ChapterID] != 100f) {
+			if (work.value.ReadStatus[chapter.value.ChapterID] != 100f) {
 				work.value.ReadStatus[chapter.value.ChapterID] = 100f
 				Storage.SaveReadStatus(work.value)
-				//LibraryIO.SaveWorkReadStatus(work.value)
+				if (Settings.Instance.GeneralStatsEnabled)
+					Storage.Stats.ChaptersRead++
+				
 			}
 		}
 	}

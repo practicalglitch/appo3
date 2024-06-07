@@ -14,6 +14,10 @@ class Settings {
 	var ReaderLineHeight: Float = 18f
 	var ReaderFontSize: Float = 14f
 	var ReaderTextAlignment: TextAlign = TextAlign.Left
+	
+	
+	var GeneralStatsEnabled: Boolean = true
+	
 	//var ReaderFont: Font
 	companion object {
 		var Instance: Settings = Settings()
