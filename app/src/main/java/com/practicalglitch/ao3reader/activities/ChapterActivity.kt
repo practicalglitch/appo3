@@ -196,6 +196,18 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 		}
 	}
 	
+	// If the menu isn't open and the user clicks back,
+	// First open the menu.
+	// If they click back again, it exits normally.
+	BackHandler {
+		if(!menuOpen.value)
+			menuOpen.value = !menuOpen.value
+		else {
+			Storage.SaveStatistics()
+			navController!!.popBackStack()
+		}
+	}
+	
 	RederTheme {
 		
 		if (showSheet.value) {
