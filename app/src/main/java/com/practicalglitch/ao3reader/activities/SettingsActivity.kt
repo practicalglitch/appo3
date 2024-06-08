@@ -329,8 +329,8 @@ fun AboutPage(){
 				ClickableText(text = "Source Code", subtext = "Hosted on GitHub") {
 					uriHandler.openUri("https://github.com/practicalglitch/appo3")
 				}
-				ClickableText(text = "Privacy Policy") {
-					//TODO: add it
+				ClickableText(text = "Privacy Policy", subtext = "TL;DR We don't collect anything.") {
+					uriHandler.openUri("https://github.com/practicalglitch/appo3/blob/main/README.md")
 				}
 			}
 		}
