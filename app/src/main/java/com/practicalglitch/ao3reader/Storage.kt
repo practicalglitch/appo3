@@ -306,8 +306,10 @@ class Storage {
 		
 		fun LoadSettings() {
 			Log.d("Settings", "Loading Settings")
-			val json = FileIO.ReadFromFile("settings.json")
-			Settings = LibraryIO.gson.fromJson(json, object : TypeToken<Settings>() {}.type)
+			FileIO.ifExists("settings.json") { path ->
+				val json = FileIO.ReadFromFile(path)
+				Settings = LibraryIO.gson.fromJson(json, object : TypeToken<Settings>() {}.type)
+			}
 		}
 	}
 }
