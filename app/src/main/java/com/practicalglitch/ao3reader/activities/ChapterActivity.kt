@@ -175,7 +175,7 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 	
 	// Records seconds read timer
 	LaunchedEffect(Unit) {
-		while(Settings.Instance.GeneralStatsEnabled){
+		while(Storage.Settings.GeneralStatsEnabled){
 			delay(1.seconds)
 			Storage.Stats.SecondsRead++
 		}
@@ -189,7 +189,7 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 			if (work.value.ReadStatus[chapter.value.ChapterID] != 100f) {
 				work.value.ReadStatus[chapter.value.ChapterID] = 100f
 				Storage.SaveReadStatus(work.value)
-				if (Settings.Instance.GeneralStatsEnabled)
+				if (Storage.Settings.GeneralStatsEnabled)
 					Storage.Stats.ChaptersRead++
 				
 			}
@@ -225,7 +225,7 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 						true
 					}
 				},
-			color = Settings.Instance.ReaderBackgroundColor
+			color = Color(Storage.Settings.ReaderBackgroundColor)
 		) {
 			// If the menu isn't open and the user clicks back,
 			// First open the menu.
@@ -301,20 +301,20 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 									) {
 										Text(
 											text = "Chapter Summary",
-											color = Settings.Instance.ReaderTextColor,
+											color = Color(Storage.Settings.ReaderTextColor),
 											textAlign = TextAlign.Center,
 											fontWeight = FontWeight.Bold,
-											lineHeight = Settings.Instance.ReaderLineHeight.sp,
-											fontSize = Settings.Instance.ReaderFontSize.sp,
+											lineHeight = Storage.Settings.ReaderLineHeight.sp,
+											fontSize = Storage.Settings.ReaderFontSize.sp,
 											modifier = Modifier.padding(10.dp),
 											fontFamily = ArbutusSlabFontFamily
 										)
 										HtmlText(
 											text = chapter.value.Summary,
 											style = TextStyle(
-												color = Settings.Instance.ReaderTextColor,
-												lineHeight = Settings.Instance.ReaderLineHeight.sp,
-												fontSize = Settings.Instance.ReaderFontSize.sp,
+												color = Color(Storage.Settings.ReaderTextColor),
+												lineHeight = Storage.Settings.ReaderLineHeight.sp,
+												fontSize = Storage.Settings.ReaderFontSize.sp,
 												fontFamily = ArbutusSlabFontFamily
 											),
 											modifier = Modifier.padding(10.dp)
@@ -326,10 +326,10 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 									) {
 										Text(
 											text = "Chapter Start Notes",
-											color = Settings.Instance.ReaderTextColor,
+											color = Color(Storage.Settings.ReaderTextColor),
 											textAlign = TextAlign.Center,
-											lineHeight = Settings.Instance.ReaderLineHeight.sp,
-											fontSize = Settings.Instance.ReaderFontSize.sp,
+											lineHeight = Storage.Settings.ReaderLineHeight.sp,
+											fontSize = Storage.Settings.ReaderFontSize.sp,
 											fontWeight = FontWeight.Bold,
 											modifier = Modifier.padding(10.dp),
 											fontFamily = ArbutusSlabFontFamily
@@ -337,9 +337,9 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 										HtmlText(
 											text = chapter.value.StartNotes,
 											style = TextStyle(
-												color = Settings.Instance.ReaderTextColor,
-												lineHeight = Settings.Instance.ReaderLineHeight.sp,
-												fontSize = Settings.Instance.ReaderFontSize.sp,
+												color = Color(Storage.Settings.ReaderTextColor),
+												lineHeight = Storage.Settings.ReaderLineHeight.sp,
+												fontSize = Storage.Settings.ReaderFontSize.sp,
 												fontFamily = ArbutusSlabFontFamily
 											),
 											modifier = Modifier.padding(10.dp)
@@ -348,9 +348,9 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 									HtmlText(
 										text = chapter.value.Body,
 										style = TextStyle(
-											color = Settings.Instance.ReaderTextColor,
-											lineHeight = Settings.Instance.ReaderLineHeight.sp,
-											fontSize = Settings.Instance.ReaderFontSize.sp,
+											color = Color(Storage.Settings.ReaderTextColor),
+											lineHeight = Storage.Settings.ReaderLineHeight.sp,
+											fontSize = Storage.Settings.ReaderFontSize.sp,
 											fontFamily = ArbutusSlabFontFamily
 										),
 										modifier = Modifier.padding(10.dp)
@@ -361,10 +361,10 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 									) {
 										Text(
 											text = "Chapter End Notes",
-											color = Settings.Instance.ReaderTextColor,
+											color = Color(Storage.Settings.ReaderTextColor),
 											textAlign = TextAlign.Center,
-											lineHeight = Settings.Instance.ReaderLineHeight.sp,
-											fontSize = Settings.Instance.ReaderFontSize.sp,
+											lineHeight = Storage.Settings.ReaderLineHeight.sp,
+											fontSize = Storage.Settings.ReaderFontSize.sp,
 											fontWeight = FontWeight.Bold,
 											modifier = Modifier.padding(10.dp),
 											fontFamily = ArbutusSlabFontFamily
@@ -372,9 +372,9 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 										HtmlText(
 											text = chapter.value.EndNotes,
 											style = TextStyle(
-												color = Settings.Instance.ReaderTextColor,
-												lineHeight = Settings.Instance.ReaderLineHeight.sp,
-												fontSize = Settings.Instance.ReaderFontSize.sp,
+												color = Color(Storage.Settings.ReaderTextColor),
+												lineHeight = Storage.Settings.ReaderLineHeight.sp,
+												fontSize = Storage.Settings.ReaderFontSize.sp,
 												fontFamily = ArbutusSlabFontFamily
 											),
 											modifier = Modifier.padding(10.dp)
@@ -398,7 +398,7 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 									} else {
 										Text(
 											text = "No next chapter.",
-											color = Settings.Instance.ReaderTextColor,
+											color = Color(Storage.Settings.ReaderTextColor),
 											textAlign = TextAlign.Center,
 										)
 									}
@@ -466,13 +466,13 @@ fun ChapterActivityMenu(
 							text = chapter.value.Title,
 							maxLines = 1,
 							overflow = TextOverflow.Ellipsis,
-							color = Settings.Instance.ReaderTextColor
+							color = Color(Storage.Settings.ReaderTextColor)
 						)
 						Text(
 							text = "${"%,d".format(wordCount.value)} words",
 							maxLines = 1,
 							overflow = TextOverflow.Ellipsis,
-							color = Settings.Instance.ReaderTextColor,
+							color = Color(Storage.Settings.ReaderTextColor),
 							style = MaterialTheme.typography.titleSmall
 						)
 					}

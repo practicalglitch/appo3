@@ -295,5 +295,19 @@ class Storage {
 				)
 			}
 		}
+		
+		var Settings: Settings = Settings()
+		
+		fun SaveSettings(): Boolean {
+			val json = LibraryIO.gson.toJson(Settings)
+			Log.d("Settings", "Saving settings")
+			return FileIO.SaveToFile("", "settings.json", json)
+		}
+		
+		fun LoadSettings() {
+			Log.d("Settings", "Loading Settings")
+			val json = FileIO.ReadFromFile("settings.json")
+			Settings = LibraryIO.gson.fromJson(json, object : TypeToken<Settings>() {}.type)
+		}
 	}
 }

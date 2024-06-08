@@ -271,7 +271,7 @@ fun PopupDialog(
 @Composable
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark Mode")
 fun GeneralSettingsPage(){
-	val statsEnabled = remember { mutableStateOf(Settings.Instance.GeneralStatsEnabled) }
+	val statsEnabled = remember { mutableStateOf(Storage.Settings.GeneralStatsEnabled) }
 	val openStatsEnabledAlert = remember { mutableStateOf(false) }
 	
 	RederTheme {
@@ -282,7 +282,7 @@ fun GeneralSettingsPage(){
 					onDismissRequest = { openStatsEnabledAlert.value = false },
 					onConfirmation = {
 						statsEnabled.value = false
-						Settings.Instance.GeneralStatsEnabled = false
+						Storage.Settings.GeneralStatsEnabled = false
 						// Overwrite stats
 						Storage.Stats = Statistics()
 						Storage.SaveStatistics()
@@ -305,7 +305,7 @@ fun GeneralSettingsPage(){
 						openStatsEnabledAlert.value = true
 					} else {
 						statsEnabled.value = true
-						Settings.Instance.GeneralStatsEnabled = true
+						Storage.Settings.GeneralStatsEnabled = true
 					}
 				}
 			}

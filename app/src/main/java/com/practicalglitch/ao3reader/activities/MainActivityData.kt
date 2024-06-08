@@ -100,7 +100,6 @@ class MainActivityData : ComponentActivity() {
 		
 		//WindowInsetsController!!.hide(WindowInsetsCompat.Type.navigationBars())
 		
-		Settings.SaveSettings()
 		
 		val intent: Intent = intent
 		val action: String? = intent.action
@@ -166,6 +165,7 @@ fun MainActivity(navController: NavController?) {
 			newChapters.addAll( LibraryIO.LoadNewChapters() )
 		
 		Storage.LoadStatistics()
+		Storage.LoadSettings()
 		
 		
 		bootup.value = true

@@ -14,8 +14,8 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.OutlinedTextField
@@ -25,12 +25,15 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableFloatStateOf
+import androidx.compose.runtime.mutableLongStateOf
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.graphics.toArgb
-import androidx.compose.ui.platform.LocalInspectionMode
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
@@ -39,8 +42,10 @@ import androidx.compose.ui.unit.sp
 import androidx.lifecycle.MutableLiveData
 import com.ireward.htmlcompose.HtmlText
 import com.practicalglitch.ao3reader.Settings
+import com.practicalglitch.ao3reader.Storage
 import com.practicalglitch.ao3reader.ui.theme.ArbutusSlabFontFamily
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
+import java.lang.NumberFormatException
 
 
 @Composable
@@ -106,12 +111,12 @@ fun SettingNumber(text: String, observer: Float?, changeAmt: Float, onChange: (F
 
 class SettingsComposable {
 	companion object {
-		val DisplayedFullscreen: MutableLiveData<Boolean> = MutableLiveData(Settings.Instance.ReaderFullscreen)
-		val DisplayedShowBatteryAndTime: MutableLiveData<Boolean> = MutableLiveData(Settings.Instance.ReaderShowBatteryAndTime)
-		val DisplayedBackgroundColor: MutableLiveData<String> = MutableLiveData(Integer.toHexString(Settings.Instance.ReaderBackgroundColor.toArgb()))
-		val DisplayedTextColor: MutableLiveData<String> = MutableLiveData(Integer.toHexString(Settings.Instance.ReaderTextColor.toArgb()))
-		val DisplayedLineHeight: MutableLiveData<Float> = MutableLiveData(Settings.Instance.ReaderLineHeight)
-		val DisplayedFontSize: MutableLiveData<Float> = MutableLiveData(Settings.Instance.ReaderFontSize)
+		//val DisplayedFullscreen: MutableLiveData<Boolean> = MutableLiveData(Settings.Instance.ReaderFullscreen)
+		//val DisplayedShowBatteryAndTime: MutableLiveData<Boolean> = MutableLiveData(Settings.Instance.ReaderShowBatteryAndTime)
+		//val DisplayedBackgroundColor: MutableLiveData<String> = MutableLiveData(Integer.toHexString(Settings.Instance.ReaderBackgroundColor.toArgb()))
+		//val DisplayedTextColor: MutableLiveData<String> = MutableLiveData(Integer.toHexString(Settings.Instance.ReaderTextColor.toArgb()))
+		//val DisplayedLineHeight: MutableLiveData<Float> = MutableLiveData(Settings.Instance.ReaderLineHeight)
+		//val DisplayedFontSize: MutableLiveData<Float> = MutableLiveData(Settings.Instance.ReaderFontSize)
 	}
 }
 
@@ -119,43 +124,46 @@ class SettingsComposable {
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReaderSettings() {
-	val fullscreen by SettingsComposable.DisplayedFullscreen.observeAsState()
-	val showBatAndTime by SettingsComposable.DisplayedShowBatteryAndTime.observeAsState()
+	val fullscreen = remember { mutableStateOf(Storage.Settings.ReaderFullscreen) }
+	val showBatAndTime = remember { mutableStateOf(Storage.Settings.ReaderShowBatteryAndTime) }
 	
-	val backgroundColor by SettingsComposable.DisplayedBackgroundColor.observeAsState()
-	val textColor by SettingsComposable.DisplayedTextColor.observeAsState()
-	val lineHeight by SettingsComposable.DisplayedLineHeight.observeAsState()
-	val fontSize by SettingsComposable.DisplayedFontSize.observeAsState()
+	val dispBackgroundColor = remember { mutableStateOf(Storage.Settings.ReaderBackgroundColor.toString()) }
+	val backgroundColor = remember { mutableLongStateOf(Storage.Settings.ReaderBackgroundColor) }
+	val dispTextColor = remember { mutableStateOf(Storage.Settings.ReaderTextColor.toString()) }
+	val textColor = remember { mutableLongStateOf(Storage.Settings.ReaderTextColor) }
+	val lineHeight = remember { mutableFloatStateOf(Storage.Settings.ReaderLineHeight) }
+	val fontSize = remember { mutableFloatStateOf(Storage.Settings.ReaderFontSize) }
 	
-	// true -> in preview
-	if(!LocalInspectionMode.current)
-		Settings.SaveSettings()
+	
 	
 	Column(modifier = Modifier.fillMaxWidth()) {
-		SettingSwitch(text = "Fullscreen", checked = fullscreen!!, onCheckedChange = {
-			Settings.Instance.ReaderFullscreen = !fullscreen!!
-			SettingsComposable.DisplayedFullscreen.postValue(!fullscreen!!)
+		SettingSwitch(text = "Fullscreen", checked = fullscreen.value, onCheckedChange = {
+			Storage.Settings.ReaderFullscreen = !fullscreen.value
+			fullscreen.value = !fullscreen.value
+			Storage.SaveSettings()
 		})
-		SettingSwitch(text = "Show Battery and Time", checked = showBatAndTime!!, onCheckedChange = {
-			Settings.Instance.ReaderShowBatteryAndTime = !showBatAndTime!!
-			SettingsComposable.DisplayedShowBatteryAndTime.postValue(!showBatAndTime!!)
+		SettingSwitch(text = "Show Battery and Time", checked = showBatAndTime.value, onCheckedChange = {
+			Storage.Settings.ReaderShowBatteryAndTime = !showBatAndTime.value
+			showBatAndTime.value = !showBatAndTime.value
+			Storage.SaveSettings()
 		})
-		Divider()
+		HorizontalDivider()
 		
+		// Text preview
 		Surface(
 			modifier = Modifier
 				.fillMaxWidth()
 				.height(150.dp)
 				.padding(10.dp)
 				.clip(RoundedCornerShape(5.dp)),
-			color = Settings.Instance.ReaderBackgroundColor
+			color = Color(backgroundColor.longValue)
 		) {
 			HtmlText(
-				text = Settings.thefuckingloremipsum,
+				text = Settings.loremIpsum,
 				style = TextStyle(
-					color = Settings.Instance.ReaderTextColor,
-					lineHeight = lineHeight!!.sp,
-					fontSize = fontSize!!.sp,
+					color = Color(textColor.longValue),
+					lineHeight = lineHeight.floatValue.sp,
+					fontSize = fontSize.floatValue.sp,
 					fontFamily = ArbutusSlabFontFamily
 				),
 				modifier = Modifier.padding(10.dp)
@@ -172,22 +180,17 @@ fun ReaderSettings() {
 		){
 			Text(text = "Background Color")
 			
-			/*Surface (modifier = Modifier.padding(10.dp)){
-				Box(modifier = Modifier
-					.size(40.dp)
-					.clip(CircleShape)
-					.background(backgroundColor!!))
-			}*/
-			
 			OutlinedTextField(
-				value = backgroundColor!!,
+				value = dispBackgroundColor.value,
 				modifier = Modifier.width(150.dp),
 				onValueChange = { str ->
+					dispBackgroundColor.value = str
 					try {
-						val newColor = Color(str.toLong(radix = 16))
-						Settings.Instance.ReaderBackgroundColor = newColor
-					} catch (_: Error){ }
-					SettingsComposable.DisplayedBackgroundColor.postValue(str)
+						val newColor = str.toLong(radix = 16)
+						Storage.Settings.ReaderBackgroundColor = newColor
+						backgroundColor.longValue = newColor
+						Storage.SaveSettings()
+					} catch (_: NumberFormatException){ }
 				})
 		}
 		// Text color picker
@@ -200,35 +203,32 @@ fun ReaderSettings() {
 		){
 			Text(text = "Font Color")
 			
-			/*Surface (modifier = Modifier.padding(10.dp)){
-				Box(modifier = Modifier
-					.size(40.dp)
-					.clip(CircleShape)
-					.background(backgroundColor!!))
-			}*/
-			
 			OutlinedTextField(
-				value = textColor!!.toString(),
+				value = dispTextColor.value,
 				modifier = Modifier.width(150.dp),
 				onValueChange = { str ->
+					dispTextColor.value = str
 					try {
-						val newColor = Color(str.toLong(radix = 16))
-						Settings.Instance.ReaderTextColor = newColor
-					} catch (_: Error){ }
-					SettingsComposable.DisplayedTextColor.postValue(str)
+						val newColor = str.toLong(radix = 16)
+						Storage.Settings.ReaderTextColor = newColor
+						textColor.longValue = newColor
+						Storage.SaveSettings()
+					} catch (_: NumberFormatException){ }
 				})
 		}
 		
-		SettingNumber(text = "Font Size", observer = fontSize, changeAmt = 1f, onChange = {
+		SettingNumber(text = "Font Size", observer = fontSize.floatValue, changeAmt = 1f, onChange = {
 			num ->
-			Settings.Instance.ReaderFontSize = num
-			SettingsComposable.DisplayedFontSize.postValue(num)
+			fontSize.floatValue = num
+			Storage.Settings.ReaderFontSize = num
+			Storage.SaveSettings()
 		})
 		
-		SettingNumber(text = "Line Height", observer = lineHeight, changeAmt = 0.5f, onChange = {
+		SettingNumber(text = "Line Height", observer = lineHeight.floatValue, changeAmt = 0.5f, onChange = {
 				num ->
-			Settings.Instance.ReaderLineHeight = num
-			SettingsComposable.DisplayedLineHeight.postValue(num)
+			lineHeight.floatValue = num
+			Storage.Settings.ReaderLineHeight = num
+			Storage.SaveSettings()
 		})
 		
 		
