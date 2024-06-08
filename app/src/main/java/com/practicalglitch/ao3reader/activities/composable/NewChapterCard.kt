@@ -73,7 +73,7 @@ fun NewChapterCard(
 		shape = MaterialTheme.shapes.small,
 		modifier = Modifier
 			.width(LocalConfiguration.current.screenWidthDp.dp)
-			.height(90.dp)
+			.height(100.dp)
 			.padding(3.dp)
 	) {
 			Column (modifier = Modifier
