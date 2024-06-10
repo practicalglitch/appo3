@@ -1,5 +1,6 @@
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -80,79 +81,82 @@ fun LibraryWorkCard(
 			Get.SavedWork(id, work, workLoaded, true)
 	}
 	
-	OutlinedCard(
-		onClick = {
-			Navigator.ToBookInfoActivity(navController!!, work.value.Work.Id, history)
-		},
-		shape = MaterialTheme.shapes.small,
-		modifier = Modifier
-			.width(LocalConfiguration.current.screenWidthDp.dp)
-			.height(100.dp)
-			.padding(3.dp)
-	) {
-		Column(
+	Box {
+		
+		OutlinedCard(
+			onClick = {
+				Navigator.ToBookInfoActivity(navController!!, work.value.Work.Id, history)
+			},
+			shape = MaterialTheme.shapes.small,
 			modifier = Modifier
-				.weight(1f)
-				.padding(10.dp, 10.dp),
-			verticalArrangement = Arrangement.SpaceBetween
+				.width(LocalConfiguration.current.screenWidthDp.dp)
+				.height(100.dp)
+				.padding(3.dp)
 		) {
-			Row(
-				modifier = Modifier.fillMaxWidth(),
-				verticalAlignment = Alignment.CenterVertically,
-				horizontalArrangement = Arrangement.SpaceBetween
+			Column(
+				modifier = Modifier
+					.weight(1f)
+					.padding(10.dp, 10.dp),
+				verticalArrangement = Arrangement.SpaceBetween
 			) {
-				Text(
-					modifier = Modifier.weight(1f),
-					text =
-					if (workLoaded.value && work.value.Work != null)
-						work.value.Work.Title
-					else
-						"",
-					maxLines = 1,
-					overflow = TextOverflow.Ellipsis
-				)
-				if(!onlineView) {
-					Badge(containerColor = MaterialTheme.colorScheme.secondary) {
-						Text(
-							text =
-							if (workLoaded.value && work.value.Work != null)
-								work.value.UnreadChapters().toString()
-							else
-								""
-						)
+				Row(
+					modifier = Modifier.fillMaxWidth(),
+					verticalAlignment = Alignment.CenterVertically,
+					horizontalArrangement = Arrangement.SpaceBetween
+				) {
+					Text(
+						modifier = Modifier.weight(1f),
+						text =
+						if (workLoaded.value && work.value.Work != null)
+							work.value.Work.Title
+						else
+							"",
+						maxLines = 1,
+						overflow = TextOverflow.Ellipsis
+					)
+					if (!onlineView) {
+						Badge(containerColor = MaterialTheme.colorScheme.secondary) {
+							Text(
+								text =
+								if (workLoaded.value && work.value.Work != null)
+									work.value.UnreadChapters().toString()
+								else
+									""
+							)
+						}
 					}
 				}
+				
+				Text(
+					text =
+					if (workLoaded.value && work.value.Work != null)
+						work.value.FandomList(1)
+					else ""
+				)
+				var dispTot = "?"
+				if (workLoaded.value && work.value.Work != null && work.value.Work.ChaptersTotal != -1)
+					dispTot = work.value.Work.ChaptersTotal.toString()
+				
+				Text(
+					text =
+					if (workLoaded.value && work.value.Work != null)
+						work.value.Work.ChaptersAvailable.toString() + "/" + dispTot
+					else
+						""
+				)
 			}
-			
-			Text(
-				text =
-				if (workLoaded.value && work.value.Work != null)
-					work.value.FandomList(1)
-				else ""
-			)
-			var dispTot = "?"
-			if (workLoaded.value && work.value.Work != null && work.value.Work.ChaptersTotal != -1)
-				dispTot = work.value.Work.ChaptersTotal.toString()
-			
-			Text(
-				text =
-				if (workLoaded.value && work.value.Work != null)
-					work.value.Work.ChaptersAvailable.toString() + "/" + dispTot
-				else
-					""
-			)
 		}
-	}
-	
-	// tl;dr if online view & saved or is in preview
-	if (onlineView && ((workLoaded.value && work.value.Work != null && Storage.SavedWorkIDs.contains(
-			work.value.Work.Id
-		)) || isPreview.value)
-	) {
-		Badge(containerColor = MaterialTheme.colorScheme.secondary) {
-			Text(
-				text = "In Library"
-			)
+		
+		// tl;dr if online view & saved or is in preview
+		if (onlineView && ((workLoaded.value && work.value.Work != null && Storage.SavedWorkIDs.contains(
+				work.value.Work.Id
+			)) || isPreview.value)
+		) {
+			Badge(containerColor = MaterialTheme.colorScheme.secondary) {
+				Text(
+					text = "In Library"
+				)
+			}
 		}
 	}
 }
