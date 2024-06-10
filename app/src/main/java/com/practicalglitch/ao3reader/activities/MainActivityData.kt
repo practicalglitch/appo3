@@ -250,7 +250,7 @@ fun MainActivity(navController: NavController?) {
 					) {
 						items(
 							items = savedWorkIDs
-						) { workId -> LibraryWorkCard(navController, workId, history) }
+						) { workId -> LibraryWorkCard(navController, workId, history, false) }
 					}
 				}
 				// If Recents

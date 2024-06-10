@@ -33,6 +33,7 @@ import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.livedata.observeAsState
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
@@ -69,6 +70,9 @@ class TagSearchActivity {
 	}
 }
 
+fun LazyListState.isScrolledToTheEnd() = layoutInfo.visibleItemsInfo.lastOrNull()?.index == layoutInfo.totalItemsCount - 1
+
+
 //args: Tag, TagText
 @SuppressLint("UnrememberedMutableState")
 @OptIn(ExperimentalMaterial3Api::class)
@@ -79,12 +83,32 @@ fun TagSearchActivity (
 ) {
 	val url by TagSearchActivity.TagUrl.observeAsState()
 	val updateData by TagSearchActivity.UpdateData.observeAsState()
+	val currentPage = remember { mutableIntStateOf(1) }
+	val listState = rememberForeverLazyListState(key = "TagSearch")
 	
 	LaunchedEffect(updateData!!) {
-		if(updateData!!) {
-		TagSearchActivity.UpdateData.postValue(false)
-		Log.d("Search", "Downloading works of https://archiveofourown.org/tags/${url!!}/works")
-		Internet().DownloadWorks(url!!, 1, TagSearchActivity.DisplayedWorks, true)
+		if (updateData!!) {
+			TagSearchActivity.UpdateData.postValue(false)
+			Log.d("Search", "Downloading works of https://archiveofourown.org/tags/${url!!}/works")
+			Internet().DownloadWorks(
+				url!!,
+				currentPage.intValue,
+				TagSearchActivity.DisplayedWorks,
+				currentPage.intValue == 1
+			)
+		}
+	}
+	
+	LaunchedEffect(listState.isScrolledToTheEnd()) {
+		if (listState.isScrolledToTheEnd() && TagSearchActivity.DisplayedWorks.size != 0){
+			currentPage.intValue++
+			Log.d("Search", "Downloading works of https://archiveofourown.org/tags/${url!!}/works, page ${currentPage.intValue}")
+			Internet().DownloadWorks(
+				url!!,
+				currentPage.intValue,
+				TagSearchActivity.DisplayedWorks,
+				currentPage.intValue == 1
+			)
 		}
 	}
 	
@@ -115,18 +139,28 @@ fun TagSearchActivity (
 				LazyColumn(
 					modifier = Modifier
 						.padding(vertical = 6.dp),
-					state = rememberForeverLazyListState(key = "TagSearch")
+					state = listState
 				) {
 					items(
 						items = TagSearchActivity.DisplayedWorks
 					) { work ->
 						
-						LibraryWorkCard(navController, work.Work.Id, history)
+						LibraryWorkCard(navController, work.Work.Id, history, true)
 					}
+					
+					item { SearchThrobber() }
 				}
 			}
 		}
 	}
+}
+
+
+@Composable
+fun SearchThrobber() {
+	// TODO: make a throbber
+	// what a dumb name btw
+	Text(text = "LOADING!!!!")
 }
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark Mode")

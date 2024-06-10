@@ -26,6 +26,7 @@ import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.practicalglitch.ao3reader.Get
 import com.practicalglitch.ao3reader.SavedWork
+import com.practicalglitch.ao3reader.Storage
 import com.practicalglitch.ao3reader.activities.BookInfoActivity
 import com.practicalglitch.ao3reader.activities.nav.NavigationData
 import com.practicalglitch.ao3reader.activities.nav.Navigator
@@ -35,11 +36,22 @@ import org.apio3.Types.WorkChapter
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark Mode")
 @Composable
-fun LibraryCardPreview() {
+fun LibraryCardPreview1() {
 	val w = SavedWork.DummySavedWork()
 	RederTheme {
 		Surface {
-			LibraryWorkCard(null, "", mutableListOf())
+			LibraryWorkCard(null, "", mutableListOf(), false)
+		}
+	}
+}
+
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark Mode")
+@Composable
+fun LibraryCardPreview2() {
+	val w = SavedWork.DummySavedWork()
+	RederTheme {
+		Surface {
+			LibraryWorkCard(null, "", mutableListOf(), true)
 		}
 	}
 }
@@ -50,20 +62,23 @@ fun LibraryCardPreview() {
 fun LibraryWorkCard(
 	navController: NavController? = null,
 	id: String,
-	history: MutableList<WorkChapter>
+	history: MutableList<WorkChapter>,
+	onlineView: Boolean
 ) {
 	val work = remember { mutableStateOf(SavedWork()) }
 	val workLoaded = remember { mutableStateOf(false) }
 	
+	
+	val isPreview = remember { mutableStateOf(false) }
 	LaunchedEffect(!workLoaded.value) {
 		if (id == "") {
 			work.value = SavedWork.DummySavedWork() // preview
 			workLoaded.value = true
+			isPreview.value = true
 			}
 		else
 			Get.SavedWork(id, work, workLoaded, true)
 	}
-	
 	
 	OutlinedCard(
 		onClick = {
@@ -96,14 +111,16 @@ fun LibraryWorkCard(
 					maxLines = 1,
 					overflow = TextOverflow.Ellipsis
 				)
-				Badge(containerColor = MaterialTheme.colorScheme.secondary) {
-					Text(
-						text =
-						if (workLoaded.value && work.value.Work != null)
-							work.value.UnreadChapters().toString()
-						else
-							""
-					)
+				if(!onlineView) {
+					Badge(containerColor = MaterialTheme.colorScheme.secondary) {
+						Text(
+							text =
+							if (workLoaded.value && work.value.Work != null)
+								work.value.UnreadChapters().toString()
+							else
+								""
+						)
+					}
 				}
 			}
 			
@@ -123,6 +140,18 @@ fun LibraryWorkCard(
 					work.value.Work.ChaptersAvailable.toString() + "/" + dispTot
 				else
 					""
+			)
+		}
+	}
+	
+	// tl;dr if online view & saved or is in preview
+	if (onlineView && ((workLoaded.value && work.value.Work != null && Storage.SavedWorkIDs.contains(
+			work.value.Work.Id
+		)) || isPreview.value)
+	) {
+		Badge(containerColor = MaterialTheme.colorScheme.secondary) {
+			Text(
+				text = "In Library"
 			)
 		}
 	}
