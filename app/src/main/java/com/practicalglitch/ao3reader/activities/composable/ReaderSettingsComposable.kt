@@ -127,9 +127,11 @@ fun ReaderSettings() {
 	val fullscreen = remember { mutableStateOf(Storage.Settings.ReaderFullscreen) }
 	val showBatAndTime = remember { mutableStateOf(Storage.Settings.ReaderShowBatteryAndTime) }
 	
-	val dispBackgroundColor = remember { mutableStateOf(Storage.Settings.ReaderBackgroundColor.toString()) }
+	// "%x".format(number) -> number to hex string
+	
+	val dispBackgroundColor = remember { mutableStateOf(java.lang.Long.toHexString(Storage.Settings.ReaderBackgroundColor)) }
 	val backgroundColor = remember { mutableLongStateOf(Storage.Settings.ReaderBackgroundColor) }
-	val dispTextColor = remember { mutableStateOf(Storage.Settings.ReaderTextColor.toString()) }
+	val dispTextColor = remember { mutableStateOf(java.lang.Long.toHexString(Storage.Settings.ReaderTextColor)) }
 	val textColor = remember { mutableLongStateOf(Storage.Settings.ReaderTextColor) }
 	val lineHeight = remember { mutableFloatStateOf(Storage.Settings.ReaderLineHeight) }
 	val fontSize = remember { mutableFloatStateOf(Storage.Settings.ReaderFontSize) }
