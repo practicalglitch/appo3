@@ -1,6 +1,5 @@
 package com.practicalglitch.ao3reader.activities
 
-import android.content.Context
 import android.content.res.Configuration
 import android.util.Log
 import androidx.activity.ComponentActivity
@@ -43,41 +42,28 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.lifecycleScope
 import androidx.navigation.NavController
-import com.practicalglitch.ao3reader.FileIO
-import com.practicalglitch.ao3reader.Library
-import com.practicalglitch.ao3reader.LibraryIO
-import com.practicalglitch.ao3reader.SavedWork
-import com.practicalglitch.ao3reader.activities.composable.subcomposable.SwipeContainer
-import com.practicalglitch.ao3reader.activities.nav.NavigationData
-import com.practicalglitch.ao3reader.activities.nav.Screen
-import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import com.ireward.htmlcompose.HtmlText
 import com.practicalglitch.ao3reader.Get
 import com.practicalglitch.ao3reader.Internet
+import com.practicalglitch.ao3reader.SavedWork
 import com.practicalglitch.ao3reader.Storage
+import com.practicalglitch.ao3reader.activities.composable.subcomposable.SwipeContainer
+import com.practicalglitch.ao3reader.activities.nav.NavigationData
 import com.practicalglitch.ao3reader.activities.nav.Navigator
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
-import org.apio3.ApiO3
-import org.apio3.Types.Work
+import com.practicalglitch.ao3reader.activities.nav.Screen
+import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import org.apio3.Types.WorkChapter
 
 
@@ -401,7 +387,7 @@ fun BookInfoActivity(
 									label = { Text("Refresh") },
 									onClick = {
 										// TODO: Add new chapters to Recents
-										Internet().DownloadWorkMetadata(workID, work, workLoaded, false, false, true)
+										Internet().DownloadWorkMetadata(workID, work, workLoaded, false, false, true, false)
 										//BookInfoActivity().GetChapters(context, work, true)
 									}
 								)

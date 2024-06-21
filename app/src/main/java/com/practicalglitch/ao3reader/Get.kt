@@ -1,12 +1,7 @@
 package com.practicalglitch.ao3reader
 
-import android.content.Context
 import android.util.Log
 import androidx.compose.runtime.MutableState
-import androidx.lifecycle.lifecycleScope
-import com.practicalglitch.ao3reader.activities.BookInfoActivity
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
 
 class Get {
 	companion object {
@@ -41,7 +36,7 @@ class Get {
 			}
 			
 			Log.d("Get", "Getting work ${id} via internet.")
-			Internet().DownloadWorkMetadata(id, out, flip, false, false, false)
+			Internet().DownloadWorkMetadata(id, out, flip, false, false, false, false)
 		}
 	}
 }

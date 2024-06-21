@@ -11,7 +11,6 @@ import kotlinx.coroutines.sync.Mutex
 import kotlinx.coroutines.withContext
 import org.apio3.ApiO3
 import org.apio3.Types.Fandom
-import org.apio3.Types.Work
 import org.apio3.Types.WorkChapter
 
 class Internet : ComponentActivity() {
@@ -92,6 +91,9 @@ class Internet : ComponentActivity() {
 				val c = ApiO3.GetChapterMetadatas(workID)
 				sWork.Work.Contents = c
 				
+				if(!rewriteReadHistory)
+					sWork.ReadStatus = obj.value.ReadStatus
+				
 				obj.value = sWork
 				// Update cache
 				Storage.CachedWorks.removeIf { it.Work.Id == sWork.Work.Id }
@@ -100,7 +102,7 @@ class Internet : ComponentActivity() {
 				
 				// Save to saved works if true
 				if(saveAfter)
-					Storage.SaveSavedWork(sWork, false)
+					Storage.SaveSavedWork(sWork, rewriteReadHistory)
 				
 				flip.value = true
 			}

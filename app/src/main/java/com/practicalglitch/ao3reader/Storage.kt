@@ -138,12 +138,13 @@ class Storage {
 				"bot_meta.json",
 				LibraryIO.gson.toJson(WorkBotMeta(savedWork.Work))
 			)
-			if(overwriteReadStatus)
+			if(overwriteReadStatus) {
 				FileIO.SaveToFile(
 					"work_${savedWork.Work.Id}",
 					"ch_read.json",
 					LibraryIO.gson.toJson(savedWork.ReadStatus)
 				)
+			}
 			
 			val chapmeta: MutableList<ChapterMeta> = mutableListOf()
 			savedWork.Work.Contents.forEach { chapter -> chapmeta.add(ChapterMeta(chapter)) }
