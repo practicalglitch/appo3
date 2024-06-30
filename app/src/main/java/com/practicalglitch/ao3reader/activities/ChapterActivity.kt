@@ -10,6 +10,7 @@ import androidx.compose.foundation.gestures.waitForUpOrCancellation
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
+import androidx.compose.foundation.layout.Spacer
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -46,6 +47,7 @@ import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.ui.Modifier
+import androidx.compose.ui.draw.alpha
 import androidx.compose.ui.geometry.Offset
 import androidx.compose.ui.graphics.Color
 import androidx.compose.ui.input.pointer.PointerInputScope
@@ -248,7 +250,9 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 										}
 									}
 								}
-								
+
+								Spacer(modifier = Modifier.height(100.dp))
+
 								if (prevChap != null) {
 									OutlinedButton(
 										modifier = Modifier
@@ -395,6 +399,7 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 											textAlign = TextAlign.Center,
 										)
 									}
+									Spacer(modifier = Modifier.height(100.dp))
 								}
 							}
 						}
@@ -406,7 +411,9 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 					chapter = chapter,
 					menuOpen = menuOpen,
 					showSheet = showSheet,
-					scrollState = columnScrollState
+					scrollState = columnScrollState,
+					showForward = if (nextChap == null) true else false,
+					showBackward = if (prevChap == null) true else false
 				) { forward ->
 					if(forward) {
 						// Set this activity to next chapter contents, jump to top of screen
@@ -433,6 +440,8 @@ fun ChapterActivityMenu(
 	menuOpen: MutableState<Boolean>,
 	showSheet: MutableState<Boolean>,
 	scrollState: ScrollState,
+	showForward: Boolean,
+	showBackward: Boolean,
 	onChangeChapter: (Boolean) -> Unit
 ) {
 	val wordCount = remember { mutableStateOf(0) }
@@ -514,6 +523,7 @@ fun ChapterActivityMenu(
 				)
 				{
 					IconButton(
+						modifier = if(showBackward) Modifier.alpha(0f) else Modifier,
 						onClick = {
 							onChangeChapter(false)
 						}) {
@@ -522,7 +532,10 @@ fun ChapterActivityMenu(
 							contentDescription = "Previous Chapter",
 						)
 					}
-					IconButton(onClick = { showSheet.value = true }) {
+
+					IconButton(
+						modifier = if(showForward) Modifier.alpha(0f) else Modifier,
+						onClick = { showSheet.value = true }) {
 						Icon(
 							Icons.Filled.Settings,
 							contentDescription = "Settings",
@@ -571,7 +584,9 @@ fun ChapterActivityMenuPreview(){
 				chapter = chapter,
 				menuOpen = menuOpen,
 				showSheet = showSheet,
-				scrollState = scrollState
+				scrollState = scrollState,
+				showBackward = true,
+				showForward = true
 			) {
 			
 			}
