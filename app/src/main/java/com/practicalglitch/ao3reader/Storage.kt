@@ -383,15 +383,16 @@ class Storage {
 			
 			val files = mutableListOf<ZipItem>()
 
-			if(info.readHistory)
+			if (info.readHistory)
 			// Get all read chapters and add it to files
-			FileIO.ls(fDir.path).forEach { file ->
-				if(file.isDirectory && file.name.contains("work_")){
-					ls(file.path).firstOrNull { subfile -> subfile.name == "ch_read.json" }
-						?.let { readstat -> files.add(ZipItem(readstat, file.name))
-						}
+				FileIO.ls(fDir.path).forEach { file ->
+					if (file.isDirectory && file.name.contains("work_")) {
+						ls(file.path).firstOrNull { subfile -> subfile.name == "ch_read.json" }
+							?.let { readstat ->
+								files.add(ZipItem(readstat, file.name))
+							}
+					}
 				}
-			}
 
 			if(info.history)
 				FileIO.ifExists("history.json") { item ->
