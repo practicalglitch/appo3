@@ -44,7 +44,6 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -55,15 +54,10 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
-import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
-import com.practicalglitch.ao3reader.FileIO
 import com.practicalglitch.ao3reader.Internet
 import com.practicalglitch.ao3reader.Library
-import com.practicalglitch.ao3reader.LibraryIO
 import com.practicalglitch.ao3reader.Save
-import com.practicalglitch.ao3reader.SavedWork
-import com.practicalglitch.ao3reader.Settings
 import com.practicalglitch.ao3reader.Storage
 import com.practicalglitch.ao3reader.activities.Discovery.Companion.DisplayFandomList
 import com.practicalglitch.ao3reader.activities.Discovery.Companion.FandomList
@@ -74,7 +68,6 @@ import com.practicalglitch.ao3reader.activities.nav.Navigator
 import com.practicalglitch.ao3reader.activities.nav.Screen
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import org.apio3.Types.Fandom
-import org.apio3.Types.WorkChapter
 import rememberForeverLazyListState
 import java.io.File
 import java.util.Locale
@@ -141,7 +134,6 @@ fun MainActivity(navController: NavController?) {
 	// state 1 -> recent
 	// state 2 -> discover
 	val activityState = remember { mutableStateOf(0) }
-	//val navTo by MainActivityData.navToWork.observeAsState()
 	val updateProgress = remember { mutableStateOf(-1) }
 	val chapterUpdateStatus = remember { mutableStateOf(0) }
 	val savedWorkIDs = remember { mutableListOf<String>() }

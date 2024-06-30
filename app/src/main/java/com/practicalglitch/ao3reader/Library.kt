@@ -1,23 +1,10 @@
 package com.practicalglitch.ao3reader
 
-import android.util.Log
 import androidx.activity.ComponentActivity
-import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
-import androidx.lifecycle.MutableLiveData
-import androidx.lifecycle.lifecycleScope
 import com.google.gson.ExclusionStrategy
 import com.google.gson.FieldAttributes
 import com.google.gson.Gson
-import com.google.gson.GsonBuilder
-import com.google.gson.reflect.TypeToken
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.sync.Mutex
-import kotlinx.coroutines.withContext
-import org.apio3.ApiO3
-import org.apio3.Types.Fandom
-import org.apio3.Types.WorkChapter
 
 
 class Library {

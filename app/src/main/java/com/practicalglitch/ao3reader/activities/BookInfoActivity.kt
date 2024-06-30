@@ -2,7 +2,6 @@ package com.practicalglitch.ao3reader.activities
 
 import android.content.res.Configuration
 import android.util.Log
-import androidx.activity.ComponentActivity
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
@@ -65,50 +64,6 @@ import com.practicalglitch.ao3reader.activities.nav.Navigator
 import com.practicalglitch.ao3reader.activities.nav.Screen
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import org.apio3.Types.WorkChapter
-
-
-class BookInfoActivity : ComponentActivity() {
-	/*fun GetChapters(context: Context, savedWork: SavedWork, forceDl: Boolean = false) {
-		chapterInfoList.clear()
-		//if(savedWork.Work.Contents == null) {
-			
-			// if this data is already saved, load it
-			if (FileIO.Exists(
-					"${LibraryIO.WorkChapterDataPath(savedWork.Work.Id)}/${LibraryIO.WorkChapterMetadataFileName()}"
-				)!! && !forceDl
-				) {
-				val savedContents = LibraryIO.LoadWorkMetadata(savedWork.Work.Id)
-				// Get read status, if exists
-				if(FileIO.Exists("${LibraryIO.WorkChapterDataPath(savedWork.Work.Id)}/${LibraryIO.WorkChapterReadStatusFileName()}")!!)
-					savedWork.ReadStatus = LibraryIO.LoadWorkReadStatus(savedWork.Work.Id)
-				
-				ChapterLoadedFromMem.postValue(true)
-				savedWork.Work.Contents = savedContents
-				chapterInfoList.addAll(savedContents)
-			}
-			else {
-				ChapterLoadedFromMem.postValue(false)
-				lifecycleScope.launch { savedWork.GetChapters(context) }
-			}
-		//}
-	}*/
-	
-	companion object {
-		//var chapterInfoList: SnapshotStateList<WorkChapter> = SnapshotStateList()
-		//var ChapterLoadedFromMem: MutableLiveData<Boolean> = MutableLiveData(false)
-		//var chapterInfoListLoadingFinished: MutableLiveData<Boolean> = MutableLiveData(false)
-		
-		
-		/*suspend fun SavedWork.GetChapters(context: Context) {
-			withContext(Dispatchers.IO) {
-				chapterInfoList = SnapshotStateList()
-				var chaptersArray = ApiO3.GetChapterMetadatas(this@GetChapters.Work.Id)
-				chapterInfoList.addAll(chaptersArray)
-				//savedWork.Work.Contents = BookInfoActivity.chapterInfoList.toTypedArray()
-			}
-		}*/
-	}
-}
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(
