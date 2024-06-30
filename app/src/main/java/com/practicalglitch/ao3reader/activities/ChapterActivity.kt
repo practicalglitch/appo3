@@ -21,7 +21,7 @@ import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.ArrowBack
-import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.Book
 import androidx.compose.material.icons.filled.NavigateBefore
 import androidx.compose.material.icons.filled.NavigateNext
 import androidx.compose.material.icons.filled.Settings
@@ -66,6 +66,7 @@ import com.practicalglitch.ao3reader.SavedWork
 import com.practicalglitch.ao3reader.Storage
 import com.practicalglitch.ao3reader.activities.composable.ReaderSettings
 import com.practicalglitch.ao3reader.activities.composable.subcomposable.DefaultScrollSettings
+import com.practicalglitch.ao3reader.activities.nav.Navigator
 import com.practicalglitch.ao3reader.ui.theme.ArbutusSlabFontFamily
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import kotlinx.coroutines.delay
@@ -267,12 +268,6 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 									) {
 										Text(text = "Previous Chapter: Ch.${prevChap!!.ChapterIndex} - ${prevChap!!.Title}")
 									}
-								} else {
-									Text(
-										text = "No previous chapter.",
-										color = Color(Storage.Settings.ReaderTextColor),
-										textAlign = TextAlign.Center,
-									)
 								}
 								
 								
@@ -409,11 +404,11 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 				ChapterActivityMenu(
 					navController = navController,
 					chapter = chapter,
-					menuOpen = menuOpen,
 					showSheet = showSheet,
 					scrollState = columnScrollState,
 					showForward = if (nextChap == null) true else false,
-					showBackward = if (prevChap == null) true else false
+					showBackward = if (prevChap == null) true else false,
+					workId = work.value.Work.Id
 				) { forward ->
 					if(forward) {
 						// Set this activity to next chapter contents, jump to top of screen
@@ -437,11 +432,11 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 fun ChapterActivityMenu(
 	navController: NavController?,
 	chapter: MutableState<WorkChapter>,
-	menuOpen: MutableState<Boolean>,
 	showSheet: MutableState<Boolean>,
 	scrollState: ScrollState,
 	showForward: Boolean,
 	showBackward: Boolean,
+	workId: String,
 	onChangeChapter: (Boolean) -> Unit
 ) {
 	val wordCount = remember { mutableStateOf(0) }
@@ -494,10 +489,12 @@ fun ChapterActivityMenu(
 						)
 					}
 				}, actions = {
-					IconButton(onClick = { menuOpen.value = false }) {
+					IconButton(onClick = {
+						Navigator.ToBookInfoActivity(navController!!, workId)
+					}) {
 						Icon(
-							imageVector = Icons.Filled.Close,
-							contentDescription = "Close",
+							imageVector = Icons.Filled.Book,
+							contentDescription = "See Work",
 							tint = Color.White
 						)
 					}
@@ -582,11 +579,11 @@ fun ChapterActivityMenuPreview(){
 			ChapterActivityMenu(
 				navController = null,
 				chapter = chapter,
-				menuOpen = menuOpen,
 				showSheet = showSheet,
 				scrollState = scrollState,
 				showBackward = true,
-				showForward = true
+				showForward = true,
+				workId = ""
 			) {
 			
 			}
