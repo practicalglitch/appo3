@@ -60,9 +60,12 @@ import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ireward.htmlcompose.HtmlText
 import com.practicalglitch.ao3reader.Internet
-import com.practicalglitch.ao3reader.Statistics
+import com.practicalglitch.ao3reader.SavedWork
 import com.practicalglitch.ao3reader.Storage
+import com.practicalglitch.ao3reader.activities.composable.ReaderSettings
 import com.practicalglitch.ao3reader.activities.composable.subcomposable.DefaultScrollSettings
+import com.practicalglitch.ao3reader.ui.theme.ArbutusSlabFontFamily
+import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
 import my.nanihadesuka.compose.ColumnScrollbar
@@ -263,7 +266,7 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 								} else {
 									Text(
 										text = "No previous chapter.",
-										color = MaterialTheme.colorScheme.onBackground,
+										color = Color(Storage.Settings.ReaderTextColor),
 										textAlign = TextAlign.Center,
 									)
 								}
@@ -272,12 +275,12 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 								if (!loaded.value) {
 									Text(
 										text = "Loading...",
-										color = MaterialTheme.colorScheme.onBackground,
+										color = Color(Storage.Settings.ReaderTextColor),
 									)
 								} else {
 									Text(
 										text = "Ch." + chapter.value.ChapterIndex + " - " + chapter.value.Title,
-										color = MaterialTheme.colorScheme.onBackground,
+										color = Color(Storage.Settings.ReaderTextColor),
 										textAlign = TextAlign.Center,
 										fontSize = 25.sp,
 										lineHeight = 30.sp,
@@ -447,7 +450,9 @@ fun ChapterActivityMenu(
 		Column {
 			TopAppBar(
 				colors = TopAppBarDefaults.topAppBarColors(
-					containerColor = MaterialTheme.colorScheme.background.copy(0.9f),
+
+					// gotta love hard coded colours!!
+					containerColor = Color(0x12, 0x13, 0x16, 230),
 					titleContentColor = MaterialTheme.colorScheme.primary,
 				),
 				title = {
@@ -475,14 +480,16 @@ fun ChapterActivityMenu(
 					}) {
 						Icon(
 							imageVector = Icons.Filled.ArrowBack,
-							contentDescription = "Back"
+							contentDescription = "Back",
+							tint = Color.White
 						)
 					}
 				}, actions = {
 					IconButton(onClick = { menuOpen.value = false }) {
 						Icon(
 							imageVector = Icons.Filled.Close,
-							contentDescription = "Close"
+							contentDescription = "Close",
+							tint = Color.White
 						)
 					}
 				})
@@ -490,6 +497,7 @@ fun ChapterActivityMenu(
 				LinearProgressIndicator(
 					modifier = Modifier.fillMaxWidth(),
 					color = MaterialTheme.colorScheme.tertiary,
+					trackColor = Color(0x44, 0x47, 0x4f, 230),
 					progress = { scrollState.value.toFloat() / scrollState.maxValue.toFloat() }
 				)
 		}
@@ -497,7 +505,7 @@ fun ChapterActivityMenu(
 		// Bottom bar
 		BottomAppBar(
 			modifier = Modifier.height(60.dp),
-			containerColor = MaterialTheme.colorScheme.background.copy(0.9f),
+			containerColor = Color(0x12, 0x13, 0x16, 230),
 			contentColor = Color.White,
 			content = {
 				Row(
@@ -539,6 +547,11 @@ fun ChapterActivityMenu(
 	uiMode = Configuration.UI_MODE_NIGHT_YES,
 	name = "Dark Mode"
 )
+@Preview(
+	showBackground = true,
+	uiMode = Configuration.UI_MODE_NIGHT_NO,
+	name = "Light Mode"
+)
 @Composable
 fun ChapterActivityMenuPreview(){
 	val chapter = remember { mutableStateOf(WorkChapter()) }
@@ -552,7 +565,7 @@ fun ChapterActivityMenuPreview(){
 	RederTheme {
 		Surface(modifier = Modifier
 			.fillMaxSize()
-			.background(Color.White)) {
+			.background(Color.Black)) {
 			ChapterActivityMenu(
 				navController = null,
 				chapter = chapter,

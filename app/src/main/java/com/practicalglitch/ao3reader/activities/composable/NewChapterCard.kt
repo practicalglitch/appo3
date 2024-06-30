@@ -82,21 +82,21 @@ fun NewChapterCard(
 				Row (modifier = Modifier.fillMaxWidth(),
 					horizontalArrangement = Arrangement.SpaceBetween) {
 					Text(text = if(workLoaded.value) work.value.Work.Title else "",
-						color = if(isRead) Color.Gray else Color.White)
+						color = if(isRead) Color.Gray else Color.Unspecified)
 					Text(
 						text = if(newChapter.UploadDate != null) newChapter.UploadDate.toString() else "",
 						textAlign = TextAlign.End,
-						color = if(isRead) Color.Gray else Color.White
+						color = if(isRead) Color.Gray else Color.Unspecified
 					)
 				}
 				
 				Text(
 					text = if(workLoaded.value) work.value.FandomList(1) else "",
-					color = if(isRead) Color.Gray else Color.White
+					color = if(isRead) Color.Gray else Color.Unspecified
 				)
 				Text(
 					text = "Ch.${newChapter.ChapterIndex} - ${newChapter.Title}",
-					color = if(isRead) Color.Gray else Color.White
+					color = if(isRead) Color.Gray else Color.Unspecified
 				)
 			}
 			

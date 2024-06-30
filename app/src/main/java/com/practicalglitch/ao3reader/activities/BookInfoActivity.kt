@@ -459,7 +459,7 @@ fun BookInfoActivity(
 										textAlign = TextAlign.Left,
 										// This is a stupid asf hack
 										// Gonna fail at some point
-										color = if (isRead) Color.Gray else Color.White
+										color = if (isRead) Color.Gray else Color.Unspecified
 									)
 									Text(
 										text = "${chapter.UploadDate}",
@@ -468,7 +468,7 @@ fun BookInfoActivity(
 											.padding(2.dp),
 										style = MaterialTheme.typography.labelSmall,
 										textAlign = TextAlign.Left,
-										color = if (isRead) Color.Gray else Color.White
+										color = if (isRead) Color.Gray else Color.Unspecified
 									)
 									
 								}

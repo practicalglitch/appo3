@@ -70,18 +70,15 @@ fun FandomCard(
 			verticalArrangement = Arrangement.SpaceBetween) {
 			Row (modifier = Modifier.fillMaxWidth(),
 				horizontalArrangement = Arrangement.SpaceBetween) {
-				Text(text = fandom.Name,
-					color = Color.White)
+				Text(text = fandom.Name)
 				Text(
 					text = fandom.WorksCount.toString() + " Works",
-					textAlign = TextAlign.End,
-					color = Color.White
+					textAlign = TextAlign.End
 				)
 			}
 			
 			Text(
-				text = fandom.Category,
-				color = Color.White
+				text = fandom.Category
 			)
 		}
 		
