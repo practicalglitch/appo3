@@ -145,8 +145,6 @@ fun MainActivity(navController: NavController?) {
 	val updateProgress = remember { mutableStateOf(-1) }
 	val chapterUpdateStatus = remember { mutableStateOf(0) }
 	val savedWorkIDs = remember { mutableListOf<String>() }
-	val newChapters = remember { mutableListOf<WorkChapter>() }
-	val history = remember { mutableListOf<WorkChapter>() }
 	
 	val bootup = remember { mutableStateOf(false) }
 	
@@ -155,15 +153,9 @@ fun MainActivity(navController: NavController?) {
 		// Load saved work ids an
 		Storage.LoadSavedWorkIDs()
 		Storage.SavedWorkIDs.forEach { savedWorkIDs.add(it) }
-		
-		// Load in history
-		if (FileIO.Exists(LibraryIO.HistoryFileName)!!)
-			history.addAll( LibraryIO.LoadHistory() )
-		
-		// Load in new chapters
-		if (FileIO.Exists(LibraryIO.NewChaptersFileName)!!)
-			newChapters.addAll( LibraryIO.LoadNewChapters() )
-		
+
+		Storage.LoadHistory()
+		Storage.LoadNewChapters()
 		Storage.LoadStatistics()
 		Storage.LoadSettings()
 		
@@ -175,8 +167,7 @@ fun MainActivity(navController: NavController?) {
 		if (MainActivityData.openInAppWorkID != "") {
 			Log.d("debug", "Workid:${MainActivityData.openInAppWorkID}")
 			Navigator.ToBookInfoActivity(navController!!,
-				MainActivityData.openInAppWorkID,
-				history)
+				MainActivityData.openInAppWorkID)
 			MainActivityData.openInAppWorkID = ""
 		}
 	}
@@ -250,7 +241,7 @@ fun MainActivity(navController: NavController?) {
 					) {
 						items(
 							items = savedWorkIDs
-						) { workId -> LibraryWorkCard(navController, workId, history, false) }
+						) { workId -> LibraryWorkCard(navController, workId, false) }
 					}
 				}
 				// If Recents
@@ -266,7 +257,6 @@ fun MainActivity(navController: NavController?) {
 									.padding(30.dp, 10.dp),
 								onClick = {
 									Internet().UpdateSavedWorks(
-										newChapters,
 										chapterUpdateStatus
 									)
 								}
@@ -283,12 +273,12 @@ fun MainActivity(navController: NavController?) {
 							}
 						}
 						items(
-							items = newChapters.reversed()
-						) { chap -> NewChapterCard(navController, chap, history) }
+							items = Storage.NewChapters.reversed()
+						) { chap -> NewChapterCard(navController, chap) }
 					}
 				}
 				if (activityState.value == 2) {
-					Discovery(navController, history)
+					Discovery(navController)
 				}
 				if(activityState.value == 3){
 					LazyColumn(
@@ -296,8 +286,8 @@ fun MainActivity(navController: NavController?) {
 							.padding(vertical = 6.dp)
 					) {
 						items(
-							items = history
-						) { chap -> NewChapterCard(navController, chap, history) }
+							items = Storage.History
+						) { chap -> NewChapterCard(navController, chap) }
 					}
 				}
 			}
@@ -315,8 +305,7 @@ class Discovery{
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Discovery(
-	navController: NavController?,
-	history: MutableList<WorkChapter>
+	navController: NavController?
 ) {
 	var text by remember { mutableStateOf("") }
 	var query by remember { mutableStateOf("") }
@@ -434,7 +423,7 @@ fun Discovery(
 			) {
 				items(
 					items = DisplayFandomList
-				) { fandom -> FandomCard(navController, fandom, history) }
+				) { fandom -> FandomCard(navController, fandom) }
 			}
 		}
 	}
@@ -446,7 +435,7 @@ fun DiscoveryPreview(){
 	RederTheme {
 		Surface {
 			Box(modifier = Modifier.fillMaxSize()){
-				Discovery(null, mutableListOf())
+				Discovery(null)
 			}
 		}
 	}

@@ -78,8 +78,7 @@ fun LazyListState.isScrolledToTheEnd() = layoutInfo.visibleItemsInfo.lastOrNull(
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun TagSearchActivity (
-	navController: NavController?,
-	history: MutableList<WorkChapter>
+	navController: NavController?
 ) {
 	val url by TagSearchActivity.TagUrl.observeAsState()
 	val updateData by TagSearchActivity.UpdateData.observeAsState()
@@ -145,7 +144,7 @@ fun TagSearchActivity (
 						items = TagSearchActivity.DisplayedWorks
 					) { work ->
 						
-						LibraryWorkCard(navController, work.Work.Id, history, true)
+						LibraryWorkCard(navController, work.Work.Id, true)
 					}
 					
 					item { SearchThrobber() }
@@ -169,7 +168,7 @@ fun TagSearchActivityPreview() {
 	TagSearchActivity.TagText = "Hollow Knight (Video Game)"
 	RederTheme {
 		Surface {
-			TagSearchActivity(null, mutableListOf())
+			TagSearchActivity(null)
 		}
 	}
 }

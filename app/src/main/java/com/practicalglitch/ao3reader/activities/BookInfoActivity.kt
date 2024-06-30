@@ -132,7 +132,6 @@ fun WorkInfoPreview(){
 fun BookInfoActivity(
 	navController: NavController? = null,
 	workID: String,
-	history: MutableList<WorkChapter>,
 	preview: Boolean = false
 ) {
 	val inLib = remember { mutableStateOf(Storage.SavedWorkIDs.contains(workID)) }
@@ -492,8 +491,7 @@ fun BookInfoActivity(
 											Navigator.ToChapterActivity(
 												navController!!,
 												work.value,
-												chapter.ChapterID,
-												history
+												chapter.ChapterID
 											)
 										}
 								) {

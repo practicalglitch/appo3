@@ -137,13 +137,13 @@ fun BottomSheet(onDismiss: () -> Unit) {
 @Composable
 fun ChapterActivityPreview(){
 	RederTheme {
-		ChapterActivity(navController = null, SavedWork(), "", mutableListOf())
+		ChapterActivity(navController = null, SavedWork(), "")
 	}
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapterId: String, historyChapters: MutableList<WorkChapter>) {
+fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapterId: String) {
 	val chapterId = remember { mutableStateOf(inChapterId) }
 	val chapter = remember { mutableStateOf(WorkChapter()) }
 	val work = remember { mutableStateOf(savedWork) }
@@ -163,9 +163,9 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 	if(loaded.value) {
 		// Add work to top of history
 		// Remove work if in history, and add it to the top
-		historyChapters.removeIf { it.WorkID == work.value.Work.Id }
-		historyChapters.add(0, work.value.Work.Contents[chapter.value.ChapterIndex - 1])
-		LibraryIO.SaveHistory(historyChapters.toTypedArray())
+		Storage.History.removeIf { it.WorkID == work.value.Work.Id }
+		Storage.History.add(0, work.value.Work.Contents[chapter.value.ChapterIndex - 1])
+		Storage.SaveHistory()
 	}
 	
 	// Downloads chapter

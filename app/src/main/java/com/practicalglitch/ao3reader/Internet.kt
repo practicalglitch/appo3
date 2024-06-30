@@ -157,7 +157,7 @@ class Internet : ComponentActivity() {
 		}
 	}
 	
-	fun UpdateSavedWorks(out: MutableList<WorkChapter>, progress: MutableState<Int>) {
+	fun UpdateSavedWorks(progress: MutableState<Int>) {
 		
 		val works = Storage.SavedWorkIDs
 		
@@ -190,8 +190,8 @@ class Internet : ComponentActivity() {
 							
 							// If it does not exist in the NewChapter array yet
 							// Add it to it
-							if ((out.filter { ch -> ch.ChapterID == onlineChapter.ChapterID }).isEmpty()) {
-								out.add(onlineChapter)
+							if ((Storage.NewChapters.filter { ch -> ch.ChapterID == onlineChapter.ChapterID }).isEmpty()) {
+								Storage.NewChapters.add(onlineChapter)
 								Log.d(
 									"Update",
 									"Found update for ${sWork.Work.Id}, ${sWork.Work.Title}: ${onlineChapter.ChapterID}, ${onlineChapter.Title}"
@@ -206,8 +206,9 @@ class Internet : ComponentActivity() {
 							// Update work and save
 							sWork.Work.Contents = onlineChapters
 							Storage.SaveSavedWork(sWork, false)
-							
-							LibraryIO.SaveNewChapters(out.toTypedArray())
+
+
+							Storage.SaveNewChapters()
 						}
 					}
 					progress.value += 1

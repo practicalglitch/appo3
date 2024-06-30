@@ -230,6 +230,23 @@ class Storage {
 			)
 		}
 		
+		fun SaveReadStatus(id: String, readStatus: HashMap<String, Float>){
+			FileIO.SaveToFile(
+				"work_${id}",
+				"ch_read.json",
+				LibraryIO.gson.toJson(readStatus)
+			)
+		}
+		
+		fun LoadReadStatus(id: String): HashMap<String, Float>{
+			val chreadjson = FileIO.ReadFromFile("work_${id}/ch_read.json")
+			val chreadData: HashMap<String, Float> = LibraryIO.gson.fromJson(
+				chreadjson,
+				object : TypeToken<HashMap<String, Float>>() {}.type
+			)
+			return chreadData
+		}
+		
 		fun SaveCachedWork(savedWork: SavedWork) {
 			Log.d("Data", "Saving a work as cache: ${savedWork.Work.Id}")
 			
@@ -277,7 +294,49 @@ class Storage {
 			CachedWorks.add(work)
 			return work
 		}
-		
+
+
+		val History = mutableListOf<WorkChapter>()
+
+		fun SaveHistory(): Boolean {
+			val json = gson.toJson(History.toTypedArray())
+			Log.d("Data", "Saving history")
+			return FileIO.SaveToFile("", "history.json", json)
+		}
+
+		fun LoadHistory() {
+			Log.d("Data", "Loading History")
+			FileIO.ifExists("history.json") { file ->
+				val json = FileIO.ReadFromFile(file)
+				val out = gson.fromJson<Array<WorkChapter>>(
+					json,
+					object : TypeToken<Array<WorkChapter>>() {}.type
+				)
+				History.removeIf { true }
+				History.addAll(out)
+			}
+		}
+
+		val NewChapters = mutableListOf<WorkChapter>()
+		fun SaveNewChapters(): Boolean {
+			val json = gson.toJson(NewChapters.toTypedArray())
+			Log.d("Data", "Saving new chapters")
+			return FileIO.SaveToFile("", "new_chapters.json", json)
+		}
+
+		fun LoadNewChapters(){
+			Log.d("Data", "Loading New Chapters")
+			FileIO.ifExists("new_chapters.json") { file ->
+				val json = FileIO.ReadFromFile(file)
+				val out = gson.fromJson<Array<WorkChapter>>(
+					json,
+					object : TypeToken<Array<WorkChapter>>() {}.type
+				)
+				NewChapters.removeIf { true }
+				NewChapters.addAll(out)
+			}
+		}
+
 		var Stats = Statistics()
 		fun SaveStatistics(){
 			FileIO.SaveToFile(

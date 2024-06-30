@@ -39,7 +39,7 @@ fun NewChapterCardPreview() {
 	val ch = w.Work.Contents[2]
 	RederTheme {
 		Surface {
-			NewChapterCard(null, ch, mutableListOf())
+			NewChapterCard(null, ch)
 		}
 	}
 }
@@ -50,8 +50,7 @@ fun NewChapterCardPreview() {
 @Composable
 fun NewChapterCard(
 	navController: NavController? = null,
-	newChapter: WorkChapter,
-	history: MutableList<WorkChapter>) {
+	newChapter: WorkChapter) {
 	val context = LocalContext.current
 	val workLoaded = remember { mutableStateOf(false) }
 	val work = remember { mutableStateOf(SavedWork()) }
@@ -68,7 +67,7 @@ fun NewChapterCard(
 	OutlinedCard(
 		onClick = {
 			if(workLoaded.value)
-				Navigator.ToChapterActivity(navController!!, work.value, newChapter.ChapterID, history)
+				Navigator.ToChapterActivity(navController!!, work.value, newChapter.ChapterID)
 		},
 		shape = MaterialTheme.shapes.small,
 		modifier = Modifier

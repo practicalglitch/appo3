@@ -41,7 +41,7 @@ fun LibraryCardPreview1() {
 	val w = SavedWork.DummySavedWork()
 	RederTheme {
 		Surface {
-			LibraryWorkCard(null, "", mutableListOf(), false)
+			LibraryWorkCard(null, "", false)
 		}
 	}
 }
@@ -52,7 +52,7 @@ fun LibraryCardPreview2() {
 	val w = SavedWork.DummySavedWork()
 	RederTheme {
 		Surface {
-			LibraryWorkCard(null, "", mutableListOf(), true)
+			LibraryWorkCard(null, "", true)
 		}
 	}
 }
@@ -63,7 +63,6 @@ fun LibraryCardPreview2() {
 fun LibraryWorkCard(
 	navController: NavController? = null,
 	id: String,
-	history: MutableList<WorkChapter>,
 	onlineView: Boolean
 ) {
 	val work = remember { mutableStateOf(SavedWork()) }
@@ -85,7 +84,7 @@ fun LibraryWorkCard(
 		
 		OutlinedCard(
 			onClick = {
-				Navigator.ToBookInfoActivity(navController!!, work.value.Work.Id, history)
+				Navigator.ToBookInfoActivity(navController!!, work.value.Work.Id)
 			},
 			shape = MaterialTheme.shapes.small,
 			modifier = Modifier

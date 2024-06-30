@@ -39,7 +39,7 @@ fun FandomCardPreview() {
 	f.WorksCount = 1;
 	RederTheme {
 		Surface {
-			FandomCard(null, f, mutableListOf())
+			FandomCard(null, f)
 		}
 	}
 }
@@ -50,8 +50,7 @@ fun FandomCardPreview() {
 @Composable
 fun FandomCard(
 	navController: NavController? = null,
-	fandom: Fandom,
-	history: MutableList<WorkChapter>) {
+	fandom: Fandom) {
 	val context = LocalContext.current
 	
 	OutlinedCard(
@@ -60,7 +59,7 @@ fun FandomCard(
 			TagSearchActivity.TagText = fandom.Name
 			TagSearchActivity.TagUrl.postValue(fandom.Url)
 			TagSearchActivity.UpdateData.postValue(true)
-			Navigator.ToTagSearchActivity(navController!!, history)
+			Navigator.ToTagSearchActivity(navController!!)
 		},
 		shape = MaterialTheme.shapes.small,
 		modifier = Modifier
