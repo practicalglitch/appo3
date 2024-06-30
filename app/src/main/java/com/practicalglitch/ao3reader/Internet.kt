@@ -66,7 +66,8 @@ class Internet : ComponentActivity() {
 		flip: MutableState<Boolean>,
 		cacheHit: Boolean,
 		acceptCacheInfoOnly: Boolean,
-		saveAfter: Boolean
+		saveAfter: Boolean,
+		rewriteReadHistory: Boolean
 	) {
 		Log.d("ApiO3", "Getting work ${workID}...")
 		

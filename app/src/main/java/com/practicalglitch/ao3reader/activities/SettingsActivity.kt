@@ -1,7 +1,9 @@
 
 import android.content.res.Configuration
-import android.graphics.drawable.Icon
+import android.util.Log
 import androidx.activity.compose.BackHandler
+import androidx.activity.compose.rememberLauncherForActivityResult
+import androidx.activity.result.contract.ActivityResultContracts
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -39,19 +41,21 @@ import androidx.compose.runtime.remember
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.vector.ImageVector
+import androidx.compose.ui.platform.LocalContext
 import androidx.compose.ui.platform.LocalUriHandler
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
-import com.practicalglitch.ao3reader.Settings
+import com.practicalglitch.ao3reader.FileIO.Companion.fDir
 import com.practicalglitch.ao3reader.Statistics
 import com.practicalglitch.ao3reader.Storage
 import com.practicalglitch.ao3reader.activities.composable.ReaderSettings
 import com.practicalglitch.ao3reader.activities.composable.SettingSwitch
-import com.practicalglitch.ao3reader.activities.nav.Screen
+import com.practicalglitch.ao3reader.activities.composable.subcomposable.CheckboxSetting
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
+import java.io.File
 
 
 class SettingsActivity {
@@ -232,15 +236,14 @@ fun PopupDialog(
 	onDismissRequest: () -> Unit,
 	onConfirmation: () -> Unit,
 	title: String,
-	text: String,
+	content: @Composable () -> Unit,
 	confirmText: String = "Confirm",
 	dismissText: String = "Cancel"
 	){
 	AlertDialog(
 		title = { Text(text = title) },
 		text = {
-			Text(
-				text = text)
+			content.invoke()
 		},
 		onDismissRequest = { onDismissRequest.invoke() },
 		confirmButton = {
@@ -277,12 +280,15 @@ fun GeneralSettingsPage(){
 						openStatsEnabledAlert.value = false
 					},
 					title = "Disable Statistics?",
-					text = "Disabling statistics will also erase all currently saved statistics." +
+					content = { Text(text =
+					"Disabling statistics will also erase all currently saved statistics." +
 							" While you can re-enable statistics in the future," +
 							" your previous statistics will not be recoverable." +
-					"\nThe following statistics will be disabled and deleted:" +
-					"\n- Time spent reading" +
-					"\n- Chapters read"
+							"\nThe following statistics will be disabled and deleted:" +
+							"\n- Time spent reading" +
+							"\n- Chapters read"
+					)
+					}
 				)
 			}
 			
@@ -328,12 +334,111 @@ fun AboutPage(){
 @Composable
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark Mode")
 fun StoragePage(){
+	val openExportDialogue = remember { mutableStateOf(false) }
+	val openImportDialogue = remember { mutableStateOf(false) }
+
+	val backupSettings = remember { mutableStateOf(Storage.Companion.BackupInfo(true, true, true, true, true, true, true)) }
+
+	val contentResolver = LocalContext.current.contentResolver
+	
+	var backup: File? = null
+
+	// Selects file to export to.
+	val backupCreator = rememberLauncherForActivityResult(
+		ActivityResultContracts.CreateDocument("application/zip")) { selectedUri ->
+		if (selectedUri != null) {
+			contentResolver.openOutputStream(selectedUri)?.use {
+				it.write(backup!!.readBytes())
+				backup!!.delete()
+			}
+		} else {
+			Log.d("Debug", "No file selected to backup to.")
+		}
+	}
+
+	// Selects backup for import.
+	val backupPicker = rememberLauncherForActivityResult(
+		ActivityResultContracts.GetContent()) { selectedUri ->
+		if (selectedUri != null) {
+			Log.d("Debug", "URI: ${selectedUri.path}")
+			val stream = contentResolver.openInputStream(selectedUri)!!
+			val data = stream.readBytes()
+			val file = File(fDir, "backup.zip")
+			file.writeBytes(data)
+			Storage.ImportBackup(file, backupSettings.value)
+		} else {
+			Log.d("Debug", "No file selected to restore from.")
+		}
+	}
+	
+	
+	
 	RederTheme {
 		Surface (modifier = Modifier.fillMaxSize()) {
-		
+
+
+			// Import backup dialogue
+			// TODO: Check what CAN be imported first!
+			when { openImportDialogue.value ->
+				PopupDialog(
+					onDismissRequest = { openImportDialogue.value = false },
+					onConfirmation = {
+						backupPicker.launch("application/zip")
+					},
+					title = "Import Backup?",
+					content = {
+						Column {
+							Text(text = "Please select which items to restore.")
+							CheckboxSetting(text = "Settings", checked = backupSettings.value.settings) {backupSettings.value.settings = !backupSettings.value.settings}
+							CheckboxSetting(text = "Read History", checked = backupSettings.value.readHistory) {backupSettings.value.readHistory = !backupSettings.value.readHistory}
+							CheckboxSetting(text = "Saved Works", checked = backupSettings.value.savedWorks) {backupSettings.value.savedWorks = !backupSettings.value.savedWorks}
+							CheckboxSetting(text = "Stats", checked = backupSettings.value.stats) {backupSettings.value.stats = !backupSettings.value.stats}
+							CheckboxSetting(text = "History", checked = backupSettings.value.history) {backupSettings.value.history = !backupSettings.value.history}
+							CheckboxSetting(text = "New Chapters", checked = backupSettings.value.newChapters) {backupSettings.value.newChapters = !backupSettings.value.newChapters}
+							CheckboxSetting(text = "Search History", checked = backupSettings.value.searchHistory) {backupSettings.value.searchHistory = !backupSettings.value.searchHistory}
+							if(backupSettings.value.readHistory)
+								Text(text = "Please note that read history is not time aware. All read history will be imported as if it was just read.")
+						}
+					}
+				)
+			}
+
+			// Export backup dialogue
+			when { openExportDialogue.value ->
+				PopupDialog(
+					onDismissRequest = { openExportDialogue.value = false },
+					onConfirmation = {
+						backup = Storage.ExportBackup(backupSettings.value)
+						backupCreator.launch("appo3_backup.zip")
+					},
+					title = "Export Backup?",
+					content = {
+						Column {
+							Text(text = "Please select which items to export.")
+							CheckboxSetting(text = "Settings", checked = backupSettings.value.settings) {backupSettings.value.settings = !backupSettings.value.settings}
+							CheckboxSetting(text = "Read History", checked = backupSettings.value.readHistory) {backupSettings.value.readHistory = !backupSettings.value.readHistory}
+							CheckboxSetting(text = "Saved Works", checked = backupSettings.value.savedWorks) {backupSettings.value.savedWorks = !backupSettings.value.savedWorks}
+							CheckboxSetting(text = "Stats", checked = backupSettings.value.stats) {backupSettings.value.stats = !backupSettings.value.stats}
+							CheckboxSetting(text = "History", checked = backupSettings.value.history) {backupSettings.value.history = !backupSettings.value.history}
+							CheckboxSetting(text = "New Chapters", checked = backupSettings.value.newChapters) {backupSettings.value.newChapters = !backupSettings.value.newChapters}
+							CheckboxSetting(text = "Search History", checked = backupSettings.value.searchHistory) {backupSettings.value.searchHistory = !backupSettings.value.searchHistory}
+						}
+					}
+				)
+			}
+
+			Column {
+				ClickableText(text = "Export Data", subtext = "Use to transfer data or create backup") {
+					openExportDialogue.value = true
+				}
+				ClickableText(text = "Import Data", subtext = "Restore or transfer data") {
+					openImportDialogue.value = true
+				}
+			}
 		}
 	}
 }
+
 
 @Composable
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark Mode")

@@ -2,8 +2,13 @@ package com.practicalglitch.ao3reader
 
 import android.util.Log
 import com.google.gson.reflect.TypeToken
+import com.practicalglitch.ao3reader.FileIO.Companion.ls
+import com.practicalglitch.ao3reader.LibraryIO.Companion.gson
+import com.practicalglitch.ao3reader.activities.MainActivityData
 import org.apio3.Types.Work
 import org.apio3.Types.WorkChapter
+import java.io.File
+import java.nio.file.Paths
 
 
 class WorkTopMeta(work: Work) {
@@ -370,6 +375,154 @@ class Storage {
 				val json = FileIO.ReadFromFile(path)
 				Settings = LibraryIO.gson.fromJson(json, object : TypeToken<Settings>() {}.type)
 			}
+		}
+		
+		
+		fun ExportBackup(info: BackupInfo): File {
+			val fDir = MainActivityData.FilesDir!!
+			
+			val files = mutableListOf<ZipItem>()
+
+			if(info.readHistory)
+			// Get all read chapters and add it to files
+			FileIO.ls(fDir.path).forEach { file ->
+				if(file.isDirectory && file.name.contains("work_")){
+					ls(file.path).firstOrNull { subfile -> subfile.name == "ch_read.json" }
+						?.let { readstat -> files.add(ZipItem(readstat, file.name))
+						}
+				}
+			}
+
+			if(info.history)
+				FileIO.ifExists("history.json") { item ->
+					files.add(ZipItem(File(fDir.path, item), "")) }
+
+			if(info.savedWorks)
+				FileIO.ifExists("saved_works.json") { item ->
+					files.add(ZipItem(File(fDir.path, item), "")) }
+
+			if(info.newChapters)
+				FileIO.ifExists("new_chapters.json") { item ->
+					files.add(ZipItem(File(fDir.path, item), "")) }
+
+			if(info.settings)
+				FileIO.ifExists("settings.json") { item ->
+					files.add(ZipItem(File(fDir.path, item), "")) }
+
+			if(info.stats)
+				FileIO.ifExists("stats.json") { item ->
+					files.add(ZipItem(File(fDir.path, item), "")) }
+			
+			val outLoc = Paths.get(fDir.path, "backup.zip").toString()
+			
+			FileIO.zip(files.toTypedArray(), outLoc)
+			
+			return File(outLoc)
+		}
+
+
+		data class BackupInfo(
+			var readHistory: Boolean,
+			var searchHistory: Boolean,
+			var history: Boolean,
+			var savedWorks: Boolean,
+			var newChapters: Boolean,
+			var settings: Boolean,
+			var stats: Boolean
+		)
+
+		
+		fun ImportBackup(backup: File, info: BackupInfo){
+			val fDir = MainActivityData.FilesDir!!
+			val restoreLoc = File(fDir, "restore")
+			FileIO.unzip(backup.path, restoreLoc)
+			backup.delete()
+			
+
+			if(info.readHistory)
+			// Merge all read data
+				restoreLoc.ls().forEach { file ->
+					if(file.isDirectory && file.name.contains("work_")){
+						ls(file.path).firstOrNull { subfile -> subfile.name == "ch_read.json" }
+							?.let { readstat ->
+								if(FileIO.Exists(file.name)!!){
+									// Merge with existing read status
+									val wid = file.name.removePrefix("work_")
+									val currentReadStatus = Storage.LoadReadStatus(wid)
+
+									val importedReadStatus: HashMap<String, Float>
+									= LibraryIO.gson.fromJson(file.readText(),
+										object : TypeToken<HashMap<String, Float>>() {}.type)
+
+									for(entry in importedReadStatus){
+										// If already read, replace if imported read status > current read stat
+										// Else, if not read, simply add it
+										if(currentReadStatus.containsKey(entry.key)){
+											if(entry.value > currentReadStatus[entry.key]!!)
+												currentReadStatus[entry.key] = entry.value
+										} else {
+											currentReadStatus[entry.key] = entry.value
+										}
+									}
+									Storage.SaveReadStatus(wid, currentReadStatus)
+								} else {
+									// If no existing read status, save to it
+									FileIO.SaveToFile(
+										file.name,
+										"ch_read.json",
+										FileIO.ReadFromFile(readstat.path)!!)
+								}
+							}
+					}
+				}
+
+			if(info.searchHistory)
+				FileIO.ifExists("restore/search_history.json") { file ->
+					Storage.History.addAll(gson.fromJson(FileIO.ReadFromFile(file),
+						object : TypeToken<Array<WorkChapter>>() {}.type))
+					Storage.SaveHistory()
+				}
+
+			if(info.history)
+				FileIO.ifExists("restore/history.json") { file ->
+					Storage.History.addAll(gson.fromJson(FileIO.ReadFromFile(file),
+						object : TypeToken<Array<WorkChapter>>() {}.type))
+					Storage.SaveHistory()
+				}
+
+			if(info.savedWorks)
+				FileIO.ifExists("restore/saved_works.json") { file ->
+					val importedItems: Array<String>
+							= LibraryIO.gson.fromJson(FileIO.ReadFromFile(file),
+						object : TypeToken<HashMap<String, Float>>() {}.type)
+					importedItems.forEach {  wid ->
+						if(!Storage.SavedWorkIDs.contains(wid))
+							Storage.SavedWorkIDs.add(wid)
+					}
+					Storage.SaveSavedWorkIDs()
+				}
+
+			if(info.newChapters)
+				// Should not be performed if newchapters already contain chapters
+				FileIO.ifExists("restore/new_chapters.json") { file ->
+					Storage.NewChapters.addAll(gson.fromJson(FileIO.ReadFromFile(file),
+						object : TypeToken<Array<WorkChapter>>() {}.type))
+					Storage.SaveNewChapters()
+				}
+
+			if(info.settings)
+				FileIO.ifExists("restore/settings.json") { file ->
+					Storage.Settings = LibraryIO.gson.fromJson(FileIO.ReadFromFile(file),
+						object : TypeToken<HashMap<String, Float>>() {}.type)
+					Storage.SaveSettings()
+				}
+
+			if(info.stats)
+				FileIO.ifExists("restore/stats.json") { file ->
+					Storage.Stats = LibraryIO.gson.fromJson(FileIO.ReadFromFile(file),
+						object : TypeToken<HashMap<String, Float>>() {}.type)
+					Storage.SaveStatistics()
+				}
 		}
 	}
 }
