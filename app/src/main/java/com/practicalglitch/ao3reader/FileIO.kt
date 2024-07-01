@@ -26,6 +26,16 @@ class FileIO : AppCompatActivity() {
 		fun File.ls(): Array<File>{
 			return ls(this.path)
 		}
+
+		fun File.relativePath(): String {
+			// No clue why. But passing in an absolute path
+			// e.g /data/user/0/com.author.package/files/myfile.txt
+			// will break but
+			// myfile.txt
+			// wont
+			// so this just strips the absolute and makes it relative.
+			return this.relativeTo(fDir!!).path
+		}
 		
 		fun ls(directory: String): Array<File> {
 			try {
@@ -41,6 +51,7 @@ class FileIO : AppCompatActivity() {
 		
 		fun ReadFromFile(fullPath: String): String? {
 			try {
+				Log.d("debugp", fullPath)
 				val file = File(fDir, fullPath)
 				val reader = FileReader(file)
 				val data = reader.readText()

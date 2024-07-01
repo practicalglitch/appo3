@@ -20,23 +20,17 @@ class Get {
 			
 			// Else, check storage
 			Storage.SavedWorkIDs.firstOrNull { it == id }?.let {
-				Storage.LoadSavedWork(id, true)
-				Log.d("Get", "Getting work ${id} via saved work storage.")
-				flip.value = true
-				return
-			}
-			
-			if(preferCacheOverInternet){
-				Storage.CachedWorkIDs.firstOrNull { it == id }?.let {
-					Storage.LoadCachedWork(id, true)
-					Log.d("Get", "Getting work ${id} via cached work storage.")
+				if(FileIO.Exists("work_${id}/top_meta.json")!!
+					&& FileIO.Exists("work_${id}/bot_meta.json")!!){
+					Storage.LoadSavedWork(id, true)
+					Log.d("Get", "Getting work ${id} via saved work storage.")
 					flip.value = true
 					return
 				}
 			}
 			
 			Log.d("Get", "Getting work ${id} via internet.")
-			Internet().DownloadWorkMetadata(id, out, flip, false, false, false, false)
+			Internet().DownloadWorkMetadata(id, out, flip, false, false, true, false)
 		}
 	}
 }

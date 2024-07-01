@@ -3,6 +3,7 @@ package com.practicalglitch.ao3reader
 import android.util.Log
 import com.google.gson.reflect.TypeToken
 import com.practicalglitch.ao3reader.FileIO.Companion.ls
+import com.practicalglitch.ao3reader.FileIO.Companion.relativePath
 import com.practicalglitch.ao3reader.LibraryIO.Companion.gson
 import com.practicalglitch.ao3reader.activities.MainActivityData
 import org.apio3.Types.Work
@@ -446,6 +447,8 @@ class Storage {
 					if(file.isDirectory && file.name.contains("work_")){
 						ls(file.path).firstOrNull { subfile -> subfile.name == "ch_read.json" }
 							?.let { readstat ->
+								Log.d("debug1", readstat.path)
+								Log.d("debug1", readstat.relativePath())
 								if(FileIO.Exists(file.name)!!){
 									// Merge with existing read status
 									val wid = file.name.removePrefix("work_")
@@ -471,7 +474,7 @@ class Storage {
 									FileIO.SaveToFile(
 										file.name,
 										"ch_read.json",
-										FileIO.ReadFromFile(readstat.path)!!)
+										FileIO.ReadFromFile(readstat.relativePath())!!)
 								}
 							}
 					}
@@ -486,8 +489,9 @@ class Storage {
 
 			if(info.history)
 				FileIO.ifExists("restore/history.json") { file ->
-					Storage.History.addAll(gson.fromJson(FileIO.ReadFromFile(file),
-						object : TypeToken<Array<WorkChapter>>() {}.type))
+					val data: Array<WorkChapter> = gson.fromJson(FileIO.ReadFromFile(file),
+						object : TypeToken<Array<WorkChapter>>() {}.type)
+					Storage.History.addAll(data)
 					Storage.SaveHistory()
 				}
 
@@ -495,7 +499,7 @@ class Storage {
 				FileIO.ifExists("restore/saved_works.json") { file ->
 					val importedItems: Array<String>
 							= LibraryIO.gson.fromJson(FileIO.ReadFromFile(file),
-						object : TypeToken<HashMap<String, Float>>() {}.type)
+						object : TypeToken<Array<String>>() {}.type)
 					importedItems.forEach {  wid ->
 						if(!Storage.SavedWorkIDs.contains(wid))
 							Storage.SavedWorkIDs.add(wid)
@@ -521,7 +525,7 @@ class Storage {
 			if(info.stats)
 				FileIO.ifExists("restore/stats.json") { file ->
 					Storage.Stats = LibraryIO.gson.fromJson(FileIO.ReadFromFile(file),
-						object : TypeToken<HashMap<String, Float>>() {}.type)
+						object : TypeToken<Statistics>() {}.type)
 					Storage.SaveStatistics()
 				}
 		}
