@@ -1,5 +1,6 @@
 package com.practicalglitch.ao3reader.activities.composable.subcomposable
 
+import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxWidth
@@ -13,13 +14,13 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
 
 @Composable
-fun CheckboxSetting(text: String, checked: Boolean, onCheckedChange: ((Boolean) -> Unit)?) {
+fun CheckboxSetting(text: String, checked: Boolean, onCheckedChange: ((Boolean) -> Unit)) {
     Row (
-        horizontalArrangement = Arrangement.SpaceBetween,
+        //horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()
-            .padding(25.dp, 10.dp)
+            .clickable { onCheckedChange.invoke(!checked) }
 
     ){
         Checkbox(checked = checked, onCheckedChange = onCheckedChange)
