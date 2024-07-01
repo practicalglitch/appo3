@@ -389,13 +389,13 @@ fun StoragePage(){
 					content = {
 						Column {
 							Text(text = "Please select which items to restore.")
-							CheckboxSetting(text = "Settings", checked = backupSettings.value.settings) {backupSettings.value.settings = !backupSettings.value.settings}
-							CheckboxSetting(text = "Read History", checked = backupSettings.value.readHistory) {backupSettings.value.readHistory = !backupSettings.value.readHistory}
-							CheckboxSetting(text = "Saved Works", checked = backupSettings.value.savedWorks) {backupSettings.value.savedWorks = !backupSettings.value.savedWorks}
-							CheckboxSetting(text = "Stats", checked = backupSettings.value.stats) {backupSettings.value.stats = !backupSettings.value.stats}
-							CheckboxSetting(text = "History", checked = backupSettings.value.history) {backupSettings.value.history = !backupSettings.value.history}
-							CheckboxSetting(text = "New Chapters", checked = backupSettings.value.newChapters) {backupSettings.value.newChapters = !backupSettings.value.newChapters}
-							CheckboxSetting(text = "Search History", checked = backupSettings.value.searchHistory) {backupSettings.value.searchHistory = !backupSettings.value.searchHistory}
+							CheckboxSetting(text = "Settings", checked = backupSettings.value.settings) {backupSettings.value = backupSettings.value.copy(settings = !backupSettings.value.settings)}
+							CheckboxSetting(text = "Read History", checked = backupSettings.value.readHistory) {backupSettings.value = backupSettings.value.copy(readHistory = !backupSettings.value.readHistory)}
+							CheckboxSetting(text = "Saved Works", checked = backupSettings.value.savedWorks) {backupSettings.value = backupSettings.value.copy(savedWorks = !backupSettings.value.savedWorks)}
+							CheckboxSetting(text = "Stats", checked = backupSettings.value.stats) {backupSettings.value = backupSettings.value.copy(stats = !backupSettings.value.stats)}
+							CheckboxSetting(text = "History", checked = backupSettings.value.history) {backupSettings.value = backupSettings.value.copy(history = !backupSettings.value.history)}
+							CheckboxSetting(text = "New Chapters", checked = backupSettings.value.newChapters) {backupSettings.value = backupSettings.value.copy(newChapters = !backupSettings.value.newChapters)}
+							CheckboxSetting(text = "Search History", checked = backupSettings.value.searchHistory) {backupSettings.value = backupSettings.value.copy(searchHistory = !backupSettings.value.searchHistory)}
 							if(backupSettings.value.readHistory)
 								Text(text = "Please note that read history is not time aware. All read history will be imported as if it was just read.")
 						}
@@ -415,13 +415,13 @@ fun StoragePage(){
 					content = {
 						Column {
 							Text(text = "Please select which items to export.")
-							CheckboxSetting(text = "Settings", checked = backupSettings.value.settings) {backupSettings.value.settings = !backupSettings.value.settings}
-							CheckboxSetting(text = "Read History", checked = backupSettings.value.readHistory) {backupSettings.value.readHistory = !backupSettings.value.readHistory}
-							CheckboxSetting(text = "Saved Works", checked = backupSettings.value.savedWorks) {backupSettings.value.savedWorks = !backupSettings.value.savedWorks}
-							CheckboxSetting(text = "Stats", checked = backupSettings.value.stats) {backupSettings.value.stats = !backupSettings.value.stats}
-							CheckboxSetting(text = "History", checked = backupSettings.value.history) {backupSettings.value.history = !backupSettings.value.history}
-							CheckboxSetting(text = "New Chapters", checked = backupSettings.value.newChapters) {backupSettings.value.newChapters = !backupSettings.value.newChapters}
-							CheckboxSetting(text = "Search History", checked = backupSettings.value.searchHistory) {backupSettings.value.searchHistory = !backupSettings.value.searchHistory}
+							CheckboxSetting(text = "Settings", checked = backupSettings.value.settings) {backupSettings.value = backupSettings.value.copy(settings = !backupSettings.value.settings)}
+							CheckboxSetting(text = "Read History", checked = backupSettings.value.readHistory) {backupSettings.value = backupSettings.value.copy(readHistory = !backupSettings.value.readHistory)}
+							CheckboxSetting(text = "Saved Works", checked = backupSettings.value.savedWorks) {backupSettings.value = backupSettings.value.copy(savedWorks = !backupSettings.value.savedWorks)}
+							CheckboxSetting(text = "Stats", checked = backupSettings.value.stats) {backupSettings.value = backupSettings.value.copy(stats = !backupSettings.value.stats)}
+							CheckboxSetting(text = "History", checked = backupSettings.value.history) {backupSettings.value = backupSettings.value.copy(history = !backupSettings.value.history)}
+							CheckboxSetting(text = "New Chapters", checked = backupSettings.value.newChapters) {backupSettings.value = backupSettings.value.copy(newChapters = !backupSettings.value.newChapters)}
+							CheckboxSetting(text = "Search History", checked = backupSettings.value.searchHistory) {backupSettings.value = backupSettings.value.copy(searchHistory = !backupSettings.value.searchHistory)}
 						}
 					}
 				)
