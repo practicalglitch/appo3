@@ -5,6 +5,7 @@ import android.util.Log
 import androidx.compose.foundation.background
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
+import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
@@ -19,25 +20,23 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CollectionsBookmark
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
-import androidx.compose.material.icons.filled.Favorite
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Public
 import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.outlined.CollectionsBookmark
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Refresh
 import androidx.compose.material3.Button
-import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
-import androidx.compose.material3.IconButton
 import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.MediumTopAppBar
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
-import androidx.compose.material3.Surface
+import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
+import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -47,6 +46,7 @@ import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.input.nestedscroll.nestedScroll
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.text.style.TextOverflow
@@ -67,106 +67,86 @@ import org.apio3.Types.WorkChapter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(
-	showBackground = true,
-	uiMode = Configuration.UI_MODE_NIGHT_YES,
-	name = "Dark Mode"
+    showBackground = true,
+    uiMode = Configuration.UI_MODE_NIGHT_YES,
+    name = "Dark Mode"
 )
 @Composable
-fun WorkInfoPreview(){
-	//var work = SavedWork.DummySavedWork()
-	//BookInfoActivity.chapterInfoList.add(work.Work.Contents[0])
-	//BookInfoActivity.chapterInfoList.add(work.Work.Contents[1])
-	//BookInfoActivity.chapterInfoList.add(work.Work.Contents[2])
-	//RederTheme {
-	//	BookInfoActivity(null, work, true)
-	//}
+fun WorkInfoPreview() {
+    //var work = SavedWork.DummySavedWork()
+    //BookInfoActivity.chapterInfoList.add(work.Work.Contents[0])
+    //BookInfoActivity.chapterInfoList.add(work.Work.Contents[1])
+    //BookInfoActivity.chapterInfoList.add(work.Work.Contents[2])
+    //RederTheme {
+    //	BookInfoActivity(null, work, true)
+    //}
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookInfoActivity(
-	navController: NavController? = null,
-	workID: String,
-	preview: Boolean = false
+    navController: NavController? = null,
+    workID: String,
+    preview: Boolean = false
 ) {
-	val inLib = remember { mutableStateOf(Storage.SavedWorkIDs.contains(workID)) }
-	
-	val work = remember { mutableStateOf(SavedWork()) }
-	val workLoaded = remember { mutableStateOf(false) }
-	
-	val stopDoubleCalling = remember { mutableStateOf(false) }
-	
-	
-	LaunchedEffect(!workLoaded.value) {
-		if(!stopDoubleCalling.value) { // whye
-			stopDoubleCalling.value = true
-			Get.SavedWork(workID, work, workLoaded, false)
-		}
-	}
-	
-	/*
-	// Handle saving data
-	if(BookInfoActivity.chapterInfoList.size != 0 && chapLoadByMem != true && preview == false) {
-		work.Work.Contents = BookInfoActivity.chapterInfoList.toTypedArray()
-		Log.d("Debugt", "${work.Work.Contents.size}, ${BookInfoActivity.chapterInfoList.size}")
-		LibraryIO.SaveWorkMetadata(work)
-	}*/
-	
-	
-	
-	
-	RederTheme {
-		
-		if(work.value.Work == null) {
-			Log.d("test", "Work null!")
-		} else {
-			if(work.value.Work.Contents == null)
-				Log.d("test", "Contents null!")
-		}
-		
-		if(workLoaded.value && work.value.Work != null) {
-			
-			Surface(
-				modifier =
-				Modifier.fillMaxSize(),
-				color = MaterialTheme.colorScheme.background
-			) {
-				Column {
-					CenterAlignedTopAppBar(
-						title = {
-							Text("Library", maxLines = 1, overflow = TextOverflow.Ellipsis)
-						},
-						navigationIcon = {
-							IconButton(onClick = {
-								/*TODO*/
-							}) {
-								Icon(Icons.Default.Menu, "Menu")
-							}
-						},
-						//Double check this. What would this button do?
-						actions = {
-							IconButton(onClick = { /*TODO*/ }) {
-								Icon(Icons.Filled.Favorite, "Menu")
-							}
-						}
+    val inLib = remember { mutableStateOf(Storage.SavedWorkIDs.contains(workID)) }
+
+    val work = remember { mutableStateOf(SavedWork()) }
+    val workLoaded = remember { mutableStateOf(false) }
+
+    val stopDoubleCalling = remember { mutableStateOf(false) }
+
+
+    LaunchedEffect(!workLoaded.value) {
+        if (!stopDoubleCalling.value) { // whye
+            stopDoubleCalling.value = true
+            Get.SavedWork(workID, work, workLoaded, false)
+        }
+    }
+
+    /*
+    // Handle saving data
+    if(BookInfoActivity.chapterInfoList.size != 0 && chapLoadByMem != true && preview == false) {
+        work.Work.Contents = BookInfoActivity.chapterInfoList.toTypedArray()
+        Log.d("Debugt", "${work.Work.Contents.size}, ${BookInfoActivity.chapterInfoList.size}")
+        LibraryIO.SaveWorkMetadata(work)
+    }*/
+
+
+
+
+    RederTheme {
+
+        if (work.value.Work == null) {
+            Log.d("test", "Work null!")
+        } else {
+            if (work.value.Work.Contents == null)
+                Log.d("test", "Contents null!")
+        }
+
+        if (workLoaded.value && work.value.Work != null) {
+
+            val scrollBehaviour = TopAppBarDefaults.enterAlwaysScrollBehavior()
+
+            Scaffold(
+                modifier = Modifier
+					.fillMaxSize()
+					.nestedScroll(scrollBehaviour.nestedScrollConnection),
+                topBar = {
+                    MediumTopAppBar(
+						title = { Text(text = work.value.Work.Title) },
+						scrollBehavior = scrollBehaviour
 					)
-					LazyColumn(
-						modifier = Modifier
-							.padding(vertical = 6.dp)
-							.weight(1f)
-					) {
+                }
+            ) { it ->
+				Box(modifier = Modifier.padding(it)) {
+					LazyColumn {
 						item {
 							// Contain the big stuff
 							SelectionContainer {
 								Column(
 									modifier = Modifier.padding(20.dp)
 								) {
-									Text(
-										text = work.value.Work.Title,
-										style = MaterialTheme.typography.titleLarge,
-										textAlign = TextAlign.Center,
-										modifier = Modifier.padding(0.dp, 5.dp)
-									)
 									Text(
 										text = work.value.Work.Author,
 										style = MaterialTheme.typography.labelMedium,
@@ -203,7 +183,7 @@ fun BookInfoActivity(
 									)
 								}
 							}
-							
+
 							var isOverflowing by remember { mutableStateOf(false) }
 							var expandSummary by remember { mutableStateOf(false) }
 							SelectionContainer {
@@ -220,14 +200,14 @@ fun BookInfoActivity(
 										overflow = TextOverflow.Ellipsis
 									)
 									Divider()
-									
+
 									val charList =
 										work.value.CharacterList(if (expandSummary) 99999 else 4)
 									val relList =
 										work.value.RelationshipList(if (expandSummary) 99999 else 4)
 									val freeList =
 										work.value.FreeformList(if (expandSummary) 99999 else 4)
-									
+
 									if (charList != "") {
 										Text(text = charList,
 											style = MaterialTheme.typography.labelMedium,
@@ -237,10 +217,10 @@ fun BookInfoActivity(
 													isOverflowing = true
 											})
 									}
-									
+
 									if (charList != "" && relList != "")
 										Divider()
-									
+
 									if (relList != "") {
 										Text(text = relList,
 											style = MaterialTheme.typography.labelMedium,
@@ -250,7 +230,7 @@ fun BookInfoActivity(
 													isOverflowing = true
 											})
 									}
-									
+
 									// There's probably an easier way to do this.
 									// Suppose Exists (E) and Not exists (N), in order
 									// char, rel, free
@@ -258,7 +238,7 @@ fun BookInfoActivity(
 									if ((relList != "" && freeList != "") || (relList == "" && charList != "" && freeList != "")) {
 										Divider()
 									}
-									
+
 									if (freeList != "") {
 										Text(text = freeList,
 											style = MaterialTheme.typography.labelMedium,
@@ -292,7 +272,7 @@ fun BookInfoActivity(
 									)
 								}
 							}
-							
+
 							NavigationBar(
 								containerColor = Color.Transparent
 							) {
@@ -341,7 +321,15 @@ fun BookInfoActivity(
 									label = { Text("Refresh") },
 									onClick = {
 										// TODO: Add new chapters to Recents
-										Internet().DownloadWorkMetadata(workID, work, workLoaded, false, false, true, false)
+										Internet().DownloadWorkMetadata(
+											workID,
+											work,
+											workLoaded,
+											false,
+											false,
+											true,
+											false
+										)
 										//BookInfoActivity().GetChapters(context, work, true)
 									}
 								)
@@ -370,17 +358,40 @@ fun BookInfoActivity(
 									onClick = { /*TODO*/ }
 								)
 							}
-							Button(
-								modifier = Modifier
-									.fillMaxWidth()
-									.padding(30.dp, 10.dp),
-								onClick = { /*TODO*/ }
-							) {
-								Text(text = "Continue Reading Chapter ")
+
+							// Get the most recent unread chapter
+
+							var mostRecentUnreadChapterIndex: WorkChapter? = null
+
+							for (chap in work.value.Work.Contents.reversed()) {
+								if (work.value.ReadStatus.containsKey(chap.ChapterID))
+									if (work.value.ReadStatus[chap.ChapterID]!! >= 99f)
+										continue
+
+								mostRecentUnreadChapterIndex = chap;
+							}
+
+							if (mostRecentUnreadChapterIndex != null) {
+
+								Button(
+									modifier = Modifier
+										.fillMaxWidth()
+										.padding(30.dp, 10.dp),
+									onClick = {
+										Navigator.ToChapterActivity(
+											navController!!,
+											work.value,
+											mostRecentUnreadChapterIndex.ChapterID
+										)
+									}
+								) {
+
+									Text(text = "Continue Reading Chapter ${mostRecentUnreadChapterIndex.ChapterIndex} - ${mostRecentUnreadChapterIndex.Title}")
+								}
 							}
 							Text(
 								text =
-								if(work.value.Work.Contents != null)
+								if (work.value.Work.Contents != null)
 									work.value.Work.Contents.size.toString() + " Chapters"
 								else
 									"0 Chapters",
@@ -391,10 +402,10 @@ fun BookInfoActivity(
 								textAlign = TextAlign.Left
 							)
 						}
-						
+
 						items(
 							items =
-							if(work.value.Work.Contents != null)
+							if (work.value.Work.Contents != null)
 								work.value.Work.Contents
 							else
 								arrayOf<WorkChapter>()
@@ -402,7 +413,7 @@ fun BookInfoActivity(
 							var readStatus =
 								work.value.ReadStatus.getOrDefault(chapter.ChapterID, 0f)
 							var isRead = readStatus == 100f
-							
+
 							SwipeContainer(
 								item = chapter,
 								onSwipe = {
@@ -410,7 +421,7 @@ fun BookInfoActivity(
 										work.value.ReadStatus[chapter.ChapterID] = 0f
 									else
 										work.value.ReadStatus[chapter.ChapterID] = 100f
-									
+
 									Storage.SaveReadStatus(work.value)
 									readStatus =
 										work.value.ReadStatus.getOrDefault(chapter.ChapterID, 0f)
@@ -470,27 +481,28 @@ fun BookInfoActivity(
 										textAlign = TextAlign.Left,
 										color = if (isRead) Color.Gray else Color.Unspecified
 									)
-									
+
 								}
-								
 							}
 						}
 					}
 				}
-			}
-		}
-	}
+            }
+        }
+    }
 }
 
 @Preview
 @Composable
 fun test() {
-	Row(modifier = Modifier
-		.padding(10.dp, 0.dp)
-		.fillMaxWidth(),
-		horizontalArrangement = Arrangement.End,
-		verticalAlignment = Alignment.CenterVertically) {
-		Icon(imageVector = Icons.Default.Visibility, contentDescription = "Unread")
-		Text(text = "Set Unread", modifier = Modifier.padding(10.dp, 0.dp))
-	}
+    Row(
+        modifier = Modifier
+			.padding(10.dp, 0.dp)
+			.fillMaxWidth(),
+        horizontalArrangement = Arrangement.End,
+        verticalAlignment = Alignment.CenterVertically
+    ) {
+        Icon(imageVector = Icons.Default.Visibility, contentDescription = "Unread")
+        Text(text = "Set Unread", modifier = Modifier.padding(10.dp, 0.dp))
+    }
 }
