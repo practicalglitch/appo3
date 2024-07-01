@@ -531,14 +531,15 @@ fun ChapterActivityMenu(
 					}
 
 					IconButton(
-						modifier = if(showForward) Modifier.alpha(0f) else Modifier,
 						onClick = { showSheet.value = true }) {
 						Icon(
 							Icons.Filled.Settings,
 							contentDescription = "Settings",
 						)
 					}
-					IconButton(onClick = {
+					IconButton(
+						modifier = if(showForward) Modifier.alpha(0f) else Modifier,
+						onClick = {
 						onChangeChapter(true)
 					}) {
 						Icon(
