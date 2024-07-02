@@ -21,19 +21,25 @@ public class SavedWork {
 				return i;
 		return -1;
 	}
-	
+
+	public int ReadChapters(){
+		if (Work.Contents == null)
+			return 0;
+
+		int read = 0;
+
+		for (float readStatus : ReadStatus.values())
+			if(readStatus >= 99f)
+				read++;
+		return read;
+	}
+
 	public int UnreadChapters() {
 		
 		if (Work.Contents == null)
 			return Work.ChaptersAvailable;
-		
-		int unreadChapters = 0;
-		
-		for (float readStatus : ReadStatus.values())
-			if (readStatus != 100)
-				unreadChapters++;
-		
-		return unreadChapters;
+
+		return Work.ChaptersAvailable - ReadChapters();
 	}
 	
 	public static SavedWork DummySavedWork() {
