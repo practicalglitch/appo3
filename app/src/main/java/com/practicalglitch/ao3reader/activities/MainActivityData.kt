@@ -303,6 +303,7 @@ fun Discovery(
 	var query by remember { mutableStateOf("") }
 	var lastquery by remember { mutableStateOf("") }
 	var active by remember { mutableStateOf(false) }
+	var loading = remember {mutableStateOf(false)}
 	var searchHistory = remember {
 		mutableStateListOf( "_PLACEHOLDER_LIST")
 	}
@@ -339,12 +340,14 @@ fun Discovery(
 					searchHistory.removeRange(5, searchHistory.size)
 				Save.SaveSearchHistory(searchHistory.toTypedArray())
 				
+				loading.value = true
+				
 				// REAL stuff
 				Internet().DownloadAllFandoms(FandomList, readyToSearch, true)
 			},
 			active = active,
 			onActiveChange = { active = it },
-			placeholder = { Text(text = "Search for work or category...") },
+			placeholder = { Text(text = "Search for fandom...") },
 			trailingIcon = {
 				if (active)
 					Icon(
@@ -384,7 +387,12 @@ fun Discovery(
 			}
 		}
 		
+		if(loading.value) {
+			Text(text = "Loading, please note this may take a while...")
+		}
+		
 		if(readyToSearch.value){
+			loading.value = false
 			if(query != lastquery) {
 				DisplayFandomList.removeRange(0, DisplayFandomList.size)
 				Log.d("Search", "Starting search...")
