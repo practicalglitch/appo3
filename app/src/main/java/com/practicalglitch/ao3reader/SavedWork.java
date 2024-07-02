@@ -87,33 +87,37 @@ public class SavedWork {
 		return sWork;
 	}
 	
-	private String buildList(String[] list, int maxSize) {
+	private String buildList(String[] list, int maxSize, String delim) {
 		if (maxSize < 0)
 			maxSize = 9999999;
 		StringBuilder builtString = new StringBuilder();
 		if(list.length > 0)
 			builtString.append(list[0]);
 		for (int i = 1; i < Math.min(list.length, maxSize); i++) {
-			builtString.append(", ").append(list[i]);
+			builtString.append(delim).append(list[i]);
 		}
 		if (list.length > maxSize)
-			builtString.append(", +").append(list.length - maxSize);
+			builtString.append(delim).append("+").append(list.length - maxSize);
 		return builtString.toString();
 	}
-	
+
 	public String FandomList(int maxSize) {
-		return buildList(Work.Fandoms, maxSize);
+		return buildList(Work.Fandoms, maxSize, ", ");
+	}
+
+	public String FandomList(int maxSize, String delim) {
+		return buildList(Work.Fandoms, maxSize, delim);
 	}
 	
 	public String RelationshipList(int maxSize) {
-		return buildList(Work.Relationships, maxSize);
+		return buildList(Work.Relationships, maxSize, ", ");
 	}
 	
 	public String CharacterList(int maxSize) {
-		return buildList(Work.Characters, maxSize);
+		return buildList(Work.Characters, maxSize, ", ");
 	}
 	
 	public String FreeformList(int maxSize) {
-		return buildList(Work.Freeforms, maxSize);
+		return buildList(Work.Freeforms, maxSize, ", ");
 	}
 }
