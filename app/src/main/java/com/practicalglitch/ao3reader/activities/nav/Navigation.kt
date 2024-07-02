@@ -21,6 +21,9 @@ class NavigationData {
 		
 		var ChapterActivity_savedWork: SavedWork = SavedWork()
 		var ChapterActivity_chapterId: String = ""
+
+		var TagSearchActivity_tag: String = ""
+		var TagSearchActivity_name: String = ""
 	}
 }
 
@@ -41,7 +44,9 @@ class Navigator {
 			navController.navigate(Screen.WebViewActivity.route)
 		}
 		
-		fun ToTagSearchActivity(navController: NavController){
+		fun ToTagSearchActivity(navController: NavController, tag: String, name: String){
+			NavigationData.TagSearchActivity_tag = tag
+			NavigationData.TagSearchActivity_name = name
 			navController.navigate(Screen.TagSearchActivity.route)
 		}
 		
@@ -72,7 +77,10 @@ fun Navigation() {
 			WebViewActivity(NavigationData.WebViewActivity_url)
 		}
 		composable(route = Screen.TagSearchActivity.route) {
-			TagSearchActivity(navController)
+			TagSearchActivity(
+				navController,
+				NavigationData.TagSearchActivity_tag,
+				NavigationData.TagSearchActivity_name)
 		}
 		composable(route = Screen.SettingsActivity.route) {
 			SettingsActivity(navController)

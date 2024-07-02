@@ -1,6 +1,5 @@
 package com.practicalglitch.ao3reader.activities.composable
 
-import TagSearchActivity
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
@@ -52,11 +51,7 @@ fun FandomCard(
 	
 	OutlinedCard(
 		onClick = {
-			// TODO: Change this to navigator!
-			TagSearchActivity.TagText = fandom.Name
-			TagSearchActivity.TagUrl.postValue(fandom.Url)
-			TagSearchActivity.UpdateData.postValue(true)
-			Navigator.ToTagSearchActivity(navController!!)
+			Navigator.ToTagSearchActivity(navController!!, fandom.Url, fandom.Name)
 		},
 		shape = MaterialTheme.shapes.small,
 		modifier = Modifier
