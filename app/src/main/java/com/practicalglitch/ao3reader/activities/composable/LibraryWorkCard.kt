@@ -109,14 +109,17 @@ fun LibraryWorkCard(
 						overflow = TextOverflow.Ellipsis
 					)
 					if (!onlineView) {
-						Badge(containerColor = MaterialTheme.colorScheme.secondary) {
-							Text(
-								text =
-								if (workLoaded.value && work.value.Work != null)
-									work.value.UnreadChapters().toString()
-								else
-									""
-							)
+						val unreadChapters = work.value.UnreadChapters()
+						if(unreadChapters != 0) {
+							Badge(containerColor = MaterialTheme.colorScheme.secondary) {
+								Text(
+									text =
+									if (workLoaded.value && work.value.Work != null)
+										unreadChapters.toString()
+									else
+										""
+								)
+							}
 						}
 					}
 				}

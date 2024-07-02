@@ -23,6 +23,9 @@ public class SavedWork {
 	}
 
 	public int ReadChapters(){
+		if(Work == null)
+			return 0;
+
 		if (Work.Contents == null)
 			return 0;
 
@@ -35,7 +38,9 @@ public class SavedWork {
 	}
 
 	public int UnreadChapters() {
-		
+		if(Work == null)
+			return 0;
+
 		if (Work.Contents == null)
 			return Work.ChaptersAvailable;
 
