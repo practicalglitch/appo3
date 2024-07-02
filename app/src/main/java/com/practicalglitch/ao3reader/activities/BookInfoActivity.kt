@@ -25,18 +25,22 @@ import androidx.compose.material.icons.filled.Visibility
 import androidx.compose.material.icons.outlined.CollectionsBookmark
 import androidx.compose.material.icons.outlined.Download
 import androidx.compose.material.icons.outlined.Refresh
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.Divider
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.MediumTopAppBar
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
+import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBarDefaults
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -67,78 +71,103 @@ import org.apio3.Types.WorkChapter
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Preview(
-    showBackground = true,
-    uiMode = Configuration.UI_MODE_NIGHT_YES,
-    name = "Dark Mode"
+	showBackground = true,
+	uiMode = Configuration.UI_MODE_NIGHT_YES,
+	name = "Dark Mode"
 )
 @Composable
 fun WorkInfoPreview() {
-    //var work = SavedWork.DummySavedWork()
-    //BookInfoActivity.chapterInfoList.add(work.Work.Contents[0])
-    //BookInfoActivity.chapterInfoList.add(work.Work.Contents[1])
-    //BookInfoActivity.chapterInfoList.add(work.Work.Contents[2])
-    //RederTheme {
-    //	BookInfoActivity(null, work, true)
-    //}
+	//var work = SavedWork.DummySavedWork()
+	//BookInfoActivity.chapterInfoList.add(work.Work.Contents[0])
+	//BookInfoActivity.chapterInfoList.add(work.Work.Contents[1])
+	//BookInfoActivity.chapterInfoList.add(work.Work.Contents[2])
+	//RederTheme {
+	//	BookInfoActivity(null, work, true)
+	//}
 }
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BookInfoActivity(
-    navController: NavController? = null,
-    workID: String,
-    preview: Boolean = false
+	navController: NavController? = null,
+	workID: String,
+	preview: Boolean = false
 ) {
-    val inLib = remember { mutableStateOf(Storage.SavedWorkIDs.contains(workID)) }
-
-    val work = remember { mutableStateOf(SavedWork()) }
-    val workLoaded = remember { mutableStateOf(false) }
-
-    val stopDoubleCalling = remember { mutableStateOf(false) }
-
-
-    LaunchedEffect(!workLoaded.value) {
-        if (!stopDoubleCalling.value) { // whye
-            stopDoubleCalling.value = true
-            Get.SavedWork(workID, work, workLoaded, false)
-        }
-    }
-
-    /*
-    // Handle saving data
-    if(BookInfoActivity.chapterInfoList.size != 0 && chapLoadByMem != true && preview == false) {
-        work.Work.Contents = BookInfoActivity.chapterInfoList.toTypedArray()
-        Log.d("Debugt", "${work.Work.Contents.size}, ${BookInfoActivity.chapterInfoList.size}")
-        LibraryIO.SaveWorkMetadata(work)
-    }*/
-
-
-
-
-    RederTheme {
-
-        if (work.value.Work == null) {
-            Log.d("test", "Work null!")
-        } else {
-            if (work.value.Work.Contents == null)
-                Log.d("test", "Contents null!")
-        }
-
-        if (workLoaded.value && work.value.Work != null) {
-
-            val scrollBehaviour = TopAppBarDefaults.enterAlwaysScrollBehavior()
-
-            Scaffold(
-                modifier = Modifier
+	val inLib = remember { mutableStateOf(Storage.SavedWorkIDs.contains(workID)) }
+	val work = remember { mutableStateOf(SavedWork()) }
+	val workLoaded = remember { mutableStateOf(false) }
+	
+	val stopDoubleCalling = remember { mutableStateOf(false) }
+	
+	
+	LaunchedEffect(!workLoaded.value) {
+		if (!stopDoubleCalling.value) { // whye
+			stopDoubleCalling.value = true
+			Get.SavedWork(workID, work, workLoaded, false)
+		}
+	}
+	
+	/*
+	// Handle saving data
+	if(BookInfoActivity.chapterInfoList.size != 0 && chapLoadByMem != true && preview == false) {
+		work.Work.Contents = BookInfoActivity.chapterInfoList.toTypedArray()
+		Log.d("Debugt", "${work.Work.Contents.size}, ${BookInfoActivity.chapterInfoList.size}")
+		LibraryIO.SaveWorkMetadata(work)
+	}*/
+	
+	
+	
+	
+	RederTheme {
+		
+		// This is for the fandom selector
+		val modalBottomSheetState = rememberModalBottomSheetState()
+		val fandomSelectorOpen = remember { mutableStateOf(false) }
+		if(fandomSelectorOpen.value) {
+			ModalBottomSheet(
+				onDismissRequest = { fandomSelectorOpen.value = false },
+				sheetState = modalBottomSheetState,
+				dragHandle = { BottomSheetDefaults.DragHandle() },
+			) {
+				Column {
+					for(i in 0 until work.value.Work.Fandoms.size){
+						OutlinedButton(onClick = {
+							Navigator.ToTagSearchActivity(navController!!,
+								work.value.Work.FandomsLoc[i],
+								work.value.Work.Fandoms[i])
+						},
+							modifier = Modifier.padding(5.dp, 2.dp)
+							) {
+							Text(work.value.Work.Fandoms[i])
+						}
+					}
+				}
+			}
+		}
+		
+		
+		if (work.value.Work == null) {
+			Log.d("test", "Work null!")
+		} else {
+			if (work.value.Work.Contents == null)
+				Log.d("test", "Contents null!")
+		}
+		
+		if (workLoaded.value && work.value.Work != null) {
+			
+			val scrollBehaviour = TopAppBarDefaults.enterAlwaysScrollBehavior()
+			
+			Scaffold(
+				modifier = Modifier
 					.fillMaxSize()
 					.nestedScroll(scrollBehaviour.nestedScrollConnection),
-                topBar = {
-                    MediumTopAppBar(
+				topBar = {
+					MediumTopAppBar(
 						title = { Text(text = work.value.Work.Title) },
 						scrollBehavior = scrollBehaviour
 					)
-                }
-            ) { it ->
+				}
+			) { it ->
 				Box(modifier = Modifier.padding(it)) {
 					LazyColumn {
 						item {
@@ -149,27 +178,39 @@ fun BookInfoActivity(
 								) {
 									Text(
 										text = work.value.Work.Author,
-										style = MaterialTheme.typography.labelMedium,
+										style = MaterialTheme.typography.labelLarge,
 										textAlign = TextAlign.Left,
-										modifier = Modifier.padding(0.dp, 2.dp)
+										modifier = Modifier.padding(0.dp, 5.dp)
 									)
 									Text(
-										text = work.value.FandomList(-1),
+										text = work.value.FandomList(-1, "\n"),
 										style = MaterialTheme.typography.labelMedium,
 										textAlign = TextAlign.Left,
-										modifier = Modifier.padding(0.dp, 2.dp)
+										modifier = Modifier
+											.padding(0.dp, 5.dp)
+											.clickable { // Go to fandom if only one, if not, open selector
+												if (work.value.Work.Fandoms.size == 1) {
+													Navigator.ToTagSearchActivity(
+														navController!!,
+														work.value.Work.FandomsLoc[0],
+														work.value.Work.Fandoms[0]
+													)
+												} else {
+													fandomSelectorOpen.value = true
+												}
+											}
 									)
 									Text(
 										text = work.value.Work.Rating,
 										style = MaterialTheme.typography.labelMedium,
 										textAlign = TextAlign.Left,
-										modifier = Modifier.padding(0.dp, 2.dp)
+										modifier = Modifier.padding(0.dp, 5.dp)
 									)
 									Text(
 										text = if (work.value.Work.Finished) "Finished" else "Ongoing",
 										style = MaterialTheme.typography.labelMedium,
 										textAlign = TextAlign.Left,
-										modifier = Modifier.padding(0.dp, 2.dp)
+										modifier = Modifier.padding(0.dp, 5.dp)
 									)
 									Text(
 										text = "${"%,d".format(work.value.Work.Words)} Words - Avg. ${
@@ -183,7 +224,7 @@ fun BookInfoActivity(
 									)
 								}
 							}
-
+							
 							var isOverflowing by remember { mutableStateOf(false) }
 							var expandSummary by remember { mutableStateOf(false) }
 							SelectionContainer {
@@ -194,43 +235,43 @@ fun BookInfoActivity(
 										maxLines = if (expandSummary) 9999 else 4,
 										modifier = Modifier.padding(10.dp),
 										onTextLayout = { textLayoutResult ->
-											if (!isOverflowing && textLayoutResult.didOverflowHeight)
+											if (textLayoutResult.didOverflowHeight)
 												isOverflowing = true
 										},
 										overflow = TextOverflow.Ellipsis
 									)
 									Divider()
-
+									
 									val charList =
 										work.value.CharacterList(if (expandSummary) 99999 else 4)
 									val relList =
 										work.value.RelationshipList(if (expandSummary) 99999 else 4)
 									val freeList =
 										work.value.FreeformList(if (expandSummary) 99999 else 4)
-
+									
 									if (charList != "") {
 										Text(text = charList,
 											style = MaterialTheme.typography.labelMedium,
 											modifier = Modifier.padding(10.dp),
 											onTextLayout = {
-												if (!isOverflowing && work.value.Work.Freeforms.size > 4)
+												if (work.value.Work.Freeforms.size > 4)
 													isOverflowing = true
 											})
 									}
-
+									
 									if (charList != "" && relList != "")
 										Divider()
-
+									
 									if (relList != "") {
 										Text(text = relList,
 											style = MaterialTheme.typography.labelMedium,
 											modifier = Modifier.padding(10.dp),
 											onTextLayout = {
-												if (!isOverflowing && work.value.Work.Freeforms.size > 4)
+												if (work.value.Work.Freeforms.size > 4)
 													isOverflowing = true
 											})
 									}
-
+									
 									// There's probably an easier way to do this.
 									// Suppose Exists (E) and Not exists (N), in order
 									// char, rel, free
@@ -238,7 +279,7 @@ fun BookInfoActivity(
 									if ((relList != "" && freeList != "") || (relList == "" && charList != "" && freeList != "")) {
 										Divider()
 									}
-
+									
 									if (freeList != "") {
 										Text(text = freeList,
 											style = MaterialTheme.typography.labelMedium,
@@ -272,7 +313,7 @@ fun BookInfoActivity(
 									)
 								}
 							}
-
+							
 							NavigationBar(
 								containerColor = Color.Transparent
 							) {
@@ -358,21 +399,21 @@ fun BookInfoActivity(
 									onClick = { /*TODO*/ }
 								)
 							}
-
+							
 							// Get the most recent unread chapter
-
+							
 							var mostRecentUnreadChapterIndex: WorkChapter? = null
-
+							
 							for (chap in work.value.Work.Contents.reversed()) {
 								if (work.value.ReadStatus.containsKey(chap.ChapterID))
 									if (work.value.ReadStatus[chap.ChapterID]!! >= 99f)
 										continue
-
+								
 								mostRecentUnreadChapterIndex = chap;
 							}
-
+							
 							if (mostRecentUnreadChapterIndex != null) {
-
+								
 								Button(
 									modifier = Modifier
 										.fillMaxWidth()
@@ -385,7 +426,7 @@ fun BookInfoActivity(
 										)
 									}
 								) {
-
+									
 									Text(text = "Continue Reading Chapter ${mostRecentUnreadChapterIndex.ChapterIndex} - ${mostRecentUnreadChapterIndex.Title}")
 								}
 							}
@@ -402,7 +443,7 @@ fun BookInfoActivity(
 								textAlign = TextAlign.Left
 							)
 						}
-
+						
 						items(
 							items =
 							if (work.value.Work.Contents != null)
@@ -413,7 +454,7 @@ fun BookInfoActivity(
 							var readStatus =
 								work.value.ReadStatus.getOrDefault(chapter.ChapterID, 0f)
 							var isRead = readStatus == 100f
-
+							
 							SwipeContainer(
 								item = chapter,
 								onSwipe = {
@@ -421,7 +462,7 @@ fun BookInfoActivity(
 										work.value.ReadStatus[chapter.ChapterID] = 0f
 									else
 										work.value.ReadStatus[chapter.ChapterID] = 100f
-
+									
 									Storage.SaveReadStatus(work.value)
 									readStatus =
 										work.value.ReadStatus.getOrDefault(chapter.ChapterID, 0f)
@@ -481,28 +522,28 @@ fun BookInfoActivity(
 										textAlign = TextAlign.Left,
 										color = if (isRead) Color.Gray else Color.Unspecified
 									)
-
+									
 								}
 							}
 						}
 					}
 				}
-            }
-        }
-    }
+			}
+		}
+	}
 }
 
 @Preview
 @Composable
 fun test() {
-    Row(
-        modifier = Modifier
+	Row(
+		modifier = Modifier
 			.padding(10.dp, 0.dp)
 			.fillMaxWidth(),
-        horizontalArrangement = Arrangement.End,
-        verticalAlignment = Alignment.CenterVertically
-    ) {
-        Icon(imageVector = Icons.Default.Visibility, contentDescription = "Unread")
-        Text(text = "Set Unread", modifier = Modifier.padding(10.dp, 0.dp))
-    }
+		horizontalArrangement = Arrangement.End,
+		verticalAlignment = Alignment.CenterVertically
+	) {
+		Icon(imageVector = Icons.Default.Visibility, contentDescription = "Unread")
+		Text(text = "Set Unread", modifier = Modifier.padding(10.dp, 0.dp))
+	}
 }
