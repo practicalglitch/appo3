@@ -37,6 +37,7 @@ import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.NavigationBarItemDefaults
 import androidx.compose.material3.OutlinedButton
 import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.rememberModalBottomSheetState
@@ -97,6 +98,7 @@ fun BookInfoActivity(
 	
 	val stopDoubleCalling = remember { mutableStateOf(false) }
 	
+	val snackbarHostState = makeSnackbarHost()
 	
 	LaunchedEffect(!workLoaded.value) {
 		if (!stopDoubleCalling.value) { // whye
@@ -144,6 +146,9 @@ fun BookInfoActivity(
 			
 			
 			Scaffold(
+				snackbarHost = {
+					SnackbarHost(snackbarHostState)
+				},
 				modifier = Modifier
 					.fillMaxSize(),
 				topBar = {

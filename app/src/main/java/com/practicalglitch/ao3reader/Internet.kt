@@ -5,6 +5,7 @@ import androidx.activity.ComponentActivity
 import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.lifecycleScope
+import com.practicalglitch.ao3reader.activities.nav.NavigationData
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.sync.Mutex
@@ -117,11 +118,15 @@ class Internet : ComponentActivity() {
 	) {
 		lifecycleScope.launch {
 			withContext(Dispatchers.IO) {
-				var dlchapter = ApiO3.DownloadSingleChapter(chapterID)
-				dlchapter.Body = dlchapter.Body.replace("\n", "\n<br>")
-				dlchapter.ChapterID = chapterID
-				chapter.value = dlchapter
-				returnBool?.value = true
+				try {
+					var dlchapter = ApiO3.DownloadSingleChapter(chapterID)
+					dlchapter.Body = dlchapter.Body.replace("\n", "\n<br>")
+					dlchapter.ChapterID = chapterID
+					chapter.value = dlchapter
+					returnBool?.value = true
+				} catch (e: Exception) {
+					NavigationData.currentSnackbarHostState?.showSnackbar("Failed to get chapter. Are you connected to the internet?")
+				}
 			}
 		}
 	}
@@ -149,6 +154,10 @@ class Internet : ComponentActivity() {
 			lifecycleScope.launch {
 				withContext(Dispatchers.IO) {
 					val fandoms = ApiO3.GetAllFandoms()
+					if(fandoms == null){
+						NavigationData.currentSnackbarHostState?.showSnackbar("Unable to get fandoms. Are you sure you are connected to the internet?")
+						return@withContext
+					}
 					allFandoms.addAll(fandoms)
 					Log.d("s", "from online: ${fandoms.size}, ${allFandoms.size}")
 					state.addAll(fandoms)
@@ -179,6 +188,13 @@ class Internet : ComponentActivity() {
 					
 					
 					val onlineChapters = ApiO3.GetChapterMetadatas(sWork.Work.Id)
+					
+					if(onlineChapters == null){
+						NavigationData.currentSnackbarHostState!!.showSnackbar("Unable to access chapter online. Are you sure you are connected to the internet?")
+						return@withContext
+					}
+					
+					
 					
 					val savedChapters = sWork.Work.Contents
 					val savedChapterIDs: MutableList<String> = mutableListOf()

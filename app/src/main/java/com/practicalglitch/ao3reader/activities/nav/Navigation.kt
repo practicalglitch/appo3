@@ -3,6 +3,7 @@ package com.practicalglitch.ao3reader.activities.nav
 import SettingsActivity
 import TagSearchActivity
 import WebViewActivity
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.runtime.Composable
 import androidx.navigation.NavController
 import androidx.navigation.compose.NavHost
@@ -15,6 +16,10 @@ import com.practicalglitch.ao3reader.activities.MainActivity
 
 class NavigationData {
 	companion object {
+		
+		var currentSnackbarHostState: SnackbarHostState? = null
+		
+		
 		var BookInfo_workId: String = ""
 		
 		var WebViewActivity_url: String = ""

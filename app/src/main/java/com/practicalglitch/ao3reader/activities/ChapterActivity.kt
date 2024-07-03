@@ -11,6 +11,7 @@ import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.Spacer
+import androidx.compose.foundation.layout.WindowInsets
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -33,6 +34,8 @@ import androidx.compose.material3.LinearProgressIndicator
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.OutlinedButton
+import androidx.compose.material3.Scaffold
+import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
@@ -128,6 +131,9 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 	val showSheet = remember { mutableStateOf(false) }
 	
 	val columnScrollState = rememberScrollState()
+	
+	val snackbarHostState = makeSnackbarHost()
+	
 	val scope = rememberCoroutineScope()
 	
 	val isAtBottom = columnScrollState.value == columnScrollState.maxValue
@@ -172,11 +178,11 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 	// First open the menu.
 	// If they click back again, it exits normally.
 	BackHandler {
-		if(!menuOpen.value)
-			menuOpen.value = !menuOpen.value
-		else {
+		if(menuOpen.value || chapter.value.Body == null){
 			Storage.SaveStatistics()
 			navController!!.popBackStack()
+		} else {
+			menuOpen.value = !menuOpen.value
 		}
 	}
 	
@@ -188,31 +194,29 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 			}
 		}
 		
-		Surface(
-			modifier = Modifier
-				.fillMaxSize()
-				.pointerInput(Unit) {
-					detectTapGestureIfMatch { position ->
-						menuOpen.value = !menuOpen.value
-						true
-					}
-				},
-			color = Color(Storage.Settings.ReaderBackgroundColor)
-		) {
-			// If the menu isn't open and the user clicks back,
-			// First open the menu.
-			// If they click back again, it exits normally.
-			BackHandler(!menuOpen.value) {
-				menuOpen.value = !menuOpen.value
-			}
-			
-			
-			ColumnScrollbar(state = columnScrollState, settings = DefaultScrollSettings) {
-				Column(
-					modifier = Modifier
-						.fillMaxSize()
-						.verticalScroll(columnScrollState)
-				) {
+		Scaffold(
+			snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
+			contentWindowInsets = WindowInsets(0)
+		) { padding ->
+			Surface(
+				modifier = Modifier
+					.fillMaxSize()
+					.padding(padding)
+					.pointerInput(Unit) {
+						detectTapGestureIfMatch { position ->
+							if (chapter.value.Body != null)
+								menuOpen.value = !menuOpen.value
+							true
+						}
+					},
+				color = Color(Storage.Settings.ReaderBackgroundColor)
+			) {
+				ColumnScrollbar(state = columnScrollState, settings = DefaultScrollSettings) {
+					Column(
+						modifier = Modifier
+							.fillMaxSize()
+							.verticalScroll(columnScrollState)
+					) {
 						SelectionContainer {
 							Column(modifier = Modifier.fillMaxSize()) {
 								
@@ -227,9 +231,9 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 										}
 									}
 								}
-
+								
 								Spacer(modifier = Modifier.height(100.dp))
-
+								
 								if (prevChap != null) {
 									OutlinedButton(
 										modifier = Modifier
@@ -373,28 +377,29 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 								}
 							}
 						}
+					}
 				}
-			}
-			if(menuOpen.value) {
-				ChapterActivityMenu(
-					navController = navController,
-					chapter = chapter,
-					showSheet = showSheet,
-					scrollState = columnScrollState,
-					showForward = if (nextChap == null) true else false,
-					showBackward = if (prevChap == null) true else false,
-					workId = work.value.Work.Id
-				) { forward ->
-					if(forward) {
-						// Set this activity to next chapter contents, jump to top of screen
-						chapterId.value = nextChap!!.ChapterID
-						loaded.value = false
-						scope.launch{ columnScrollState.scrollTo(0) }
-					} else {
-						// Get previous chapter, set displayed chapter to it.
-						chapterId.value = prevChap!!.ChapterID
-						loaded.value = false
-						scope.launch{ columnScrollState.scrollTo(0) }
+				if (menuOpen.value) {
+					ChapterActivityMenu(
+						navController = navController,
+						chapter = chapter,
+						showSheet = showSheet,
+						scrollState = columnScrollState,
+						showForward = if (nextChap == null) true else false,
+						showBackward = if (prevChap == null) true else false,
+						workId = work.value.Work.Id
+					) { forward ->
+						if (forward) {
+							// Set this activity to next chapter contents, jump to top of screen
+							chapterId.value = nextChap!!.ChapterID
+							loaded.value = false
+							scope.launch { columnScrollState.scrollTo(0) }
+						} else {
+							// Get previous chapter, set displayed chapter to it.
+							chapterId.value = prevChap!!.ChapterID
+							loaded.value = false
+							scope.launch { columnScrollState.scrollTo(0) }
+						}
 					}
 				}
 			}

@@ -39,6 +39,8 @@ import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
+import androidx.compose.material3.SnackbarHost
+import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -64,6 +66,7 @@ import com.practicalglitch.ao3reader.activities.Discovery.Companion.FandomList
 import com.practicalglitch.ao3reader.activities.composable.FandomCard
 import com.practicalglitch.ao3reader.activities.composable.NewChapterCard
 import com.practicalglitch.ao3reader.activities.nav.Navigation
+import com.practicalglitch.ao3reader.activities.nav.NavigationData
 import com.practicalglitch.ao3reader.activities.nav.Navigator
 import com.practicalglitch.ao3reader.activities.nav.Screen
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
@@ -114,6 +117,13 @@ class MainActivityData : ComponentActivity() {
 	
 }
 
+@Composable
+fun makeSnackbarHost(): SnackbarHostState{
+	val snackbarHostState = remember { SnackbarHostState() }
+	NavigationData.currentSnackbarHostState = snackbarHostState
+	return snackbarHostState
+}
+
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -125,6 +135,8 @@ fun MainActivity(navController: NavController?) {
 	val updateProgress = remember { mutableStateOf(-1) }
 	val chapterUpdateStatus = remember { mutableStateOf(0) }
 	val savedWorkIDs = remember { mutableListOf<String>() }
+	
+	val snackbarHostState = makeSnackbarHost()
 	
 	val bootup = remember { mutableStateOf(false) }
 	
@@ -155,6 +167,7 @@ fun MainActivity(navController: NavController?) {
 	
 	RederTheme {
 		Scaffold (
+			snackbarHost = { SnackbarHost(hostState = snackbarHostState)},
 			topBar = {
 				CenterAlignedTopAppBar(
 					title = {
