@@ -45,7 +45,6 @@ import androidx.compose.ui.unit.sp
 import androidx.compose.ui.viewinterop.AndroidView
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Preview(
 	showBackground = true,
 	uiMode = Configuration.UI_MODE_NIGHT_YES,

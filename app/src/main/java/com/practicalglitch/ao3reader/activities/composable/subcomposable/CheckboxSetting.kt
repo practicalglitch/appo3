@@ -16,7 +16,6 @@ import androidx.compose.ui.unit.dp
 @Composable
 fun CheckboxSetting(text: String, checked: Boolean, onCheckedChange: ((Boolean) -> Unit)) {
     Row (
-        //horizontalArrangement = Arrangement.SpaceBetween,
         verticalAlignment = Alignment.CenterVertically,
         modifier = Modifier
             .fillMaxWidth()

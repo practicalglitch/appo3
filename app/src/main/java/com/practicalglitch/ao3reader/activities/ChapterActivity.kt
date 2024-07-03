@@ -15,7 +15,6 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
-import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.rememberScrollState
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.foundation.verticalScroll
@@ -42,7 +41,6 @@ import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.MutableState
-import androidx.compose.runtime.derivedStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
@@ -89,27 +87,6 @@ suspend fun PointerInputScope.detectTapGestureIfMatch(
 	}
 }
 
-
-//thx stackoverflow
-@Composable
-private fun LazyListState.isAtBottom(): Boolean {
-	
-	return remember(this) {
-		derivedStateOf {
-			val visibleItemsInfo = layoutInfo.visibleItemsInfo
-			if (layoutInfo.totalItemsCount == 0) {
-				false
-			} else {
-				val lastVisibleItem = visibleItemsInfo.last()
-				val viewportHeight = layoutInfo.viewportEndOffset + layoutInfo.viewportStartOffset
-				
-				(lastVisibleItem.index + 1 == layoutInfo.totalItemsCount &&
-						lastVisibleItem.offset + lastVisibleItem.size <= viewportHeight)
-			}
-		}
-	}.value
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun BottomSheet(onDismiss: () -> Unit) {
@@ -137,7 +114,6 @@ fun ChapterActivityPreview(){
 	}
 }
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapterId: String) {
 	val chapterId = remember { mutableStateOf(inChapterId) }
@@ -381,7 +357,6 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 												// Set this activity to next chapter contents, jump to top of screen
 												chapterId.value = nextChap!!.ChapterID
 												loaded.value = false
-												//Internet().DownloadChapter(chapterId.value, chapter)
 												scope.launch { columnScrollState.scrollTo(0) }
 											}
 										) {

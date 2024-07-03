@@ -105,17 +105,6 @@ fun BookInfoActivity(
 		}
 	}
 	
-	/*
-	// Handle saving data
-	if(BookInfoActivity.chapterInfoList.size != 0 && chapLoadByMem != true && preview == false) {
-		work.Work.Contents = BookInfoActivity.chapterInfoList.toTypedArray()
-		Log.d("Debugt", "${work.Work.Contents.size}, ${BookInfoActivity.chapterInfoList.size}")
-		LibraryIO.SaveWorkMetadata(work)
-	}*/
-	
-	
-	
-	
 	RederTheme {
 		
 		// This is for the fandom selector
@@ -366,7 +355,6 @@ fun BookInfoActivity(
 											true,
 											false
 										)
-										//BookInfoActivity().GetChapters(context, work, true)
 									}
 								)
 								NavigationBarItem(
@@ -504,8 +492,6 @@ fun BookInfoActivity(
 											.padding(2.dp),
 										style = MaterialTheme.typography.labelMedium,
 										textAlign = TextAlign.Left,
-										// This is a stupid asf hack
-										// Gonna fail at some point
 										color = if (isRead) Color.Gray else Color.Unspecified
 									)
 									Text(

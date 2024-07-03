@@ -91,8 +91,6 @@ class MainActivityData : ComponentActivity() {
 			)
 		)
 		
-		//WindowInsetsController!!.hide(WindowInsetsCompat.Type.navigationBars())
-		
 		
 		val intent: Intent = intent
 		val action: String? = intent.action
@@ -101,7 +99,6 @@ class MainActivityData : ComponentActivity() {
 		if (data != null) {
 			val urlSplit = data.toString().split("/")
 			openInAppWorkID = urlSplit[urlSplit.indexOf("works") + 1]
-			//Internet().DownloadWorkMetadata(workID, navToWork)
 		}
 		
 		
@@ -113,19 +110,10 @@ class MainActivityData : ComponentActivity() {
 	companion object {
 		var FilesDir: File? = null
 		var openInAppWorkID: String = ""
-		//var myLibrary: SnapshotStateList<SavedWork> = SnapshotStateList()
-		//var newChapters: SnapshotStateList<WorkChapter> = SnapshotStateList()
-		//var activityState = MutableLiveData<Int>(0)
-		
-		//var UpdateProgress = MutableLiveData<Int>(-1)
-		//var navToWork = MutableLiveData<SavedWork?>(null)
 	}
 	
 }
 
-//@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark Mode")
-//@Preview(showBackground = true, name = "Light Mode")
-//names: List<String> = List(1000) { "$it" }
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -331,7 +319,6 @@ fun Discovery(
 				query = it;
 				// Search bar stuff
 				Log.d("Search", "Starting search Early")
-				//display = false
 				active = false
 				if (searchHistory.contains(it))
 					searchHistory.remove(it)

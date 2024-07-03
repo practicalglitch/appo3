@@ -1,3 +1,4 @@
+
 import android.content.res.Configuration
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -8,7 +9,6 @@ import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.width
 import androidx.compose.material3.Badge
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedCard
 import androidx.compose.material3.Surface
@@ -33,7 +33,6 @@ import com.practicalglitch.ao3reader.ui.theme.RederTheme
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark Mode")
 @Composable
 fun LibraryCardPreview1() {
-	val w = SavedWork.DummySavedWork()
 	RederTheme {
 		Surface {
 			LibraryWorkCard(null, "", false)
@@ -53,7 +52,6 @@ fun LibraryCardPreview2() {
 }
 
 
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun LibraryWorkCard(
 	navController: NavController? = null,

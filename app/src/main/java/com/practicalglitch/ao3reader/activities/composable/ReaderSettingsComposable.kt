@@ -14,7 +14,6 @@ import androidx.compose.foundation.text.KeyboardOptions
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.Add
 import androidx.compose.material.icons.filled.Remove
-import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.HorizontalDivider
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
@@ -23,8 +22,6 @@ import androidx.compose.material3.Surface
 import androidx.compose.material3.Switch
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
-import androidx.compose.runtime.getValue
-import androidx.compose.runtime.livedata.observeAsState
 import androidx.compose.runtime.mutableFloatStateOf
 import androidx.compose.runtime.mutableLongStateOf
 import androidx.compose.runtime.mutableStateOf
@@ -33,19 +30,16 @@ import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
-import androidx.compose.ui.graphics.toArgb
 import androidx.compose.ui.text.TextStyle
 import androidx.compose.ui.text.input.KeyboardType
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.lifecycle.MutableLiveData
 import com.ireward.htmlcompose.HtmlText
 import com.practicalglitch.ao3reader.Settings
 import com.practicalglitch.ao3reader.Storage
 import com.practicalglitch.ao3reader.ui.theme.ArbutusSlabFontFamily
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
-import java.lang.NumberFormatException
 
 
 @Composable
@@ -108,26 +102,10 @@ fun SettingNumber(text: String, observer: Float?, changeAmt: Float, onChange: (F
 }
 
 
-
-class SettingsComposable {
-	companion object {
-		//val DisplayedFullscreen: MutableLiveData<Boolean> = MutableLiveData(Settings.Instance.ReaderFullscreen)
-		//val DisplayedShowBatteryAndTime: MutableLiveData<Boolean> = MutableLiveData(Settings.Instance.ReaderShowBatteryAndTime)
-		//val DisplayedBackgroundColor: MutableLiveData<String> = MutableLiveData(Integer.toHexString(Settings.Instance.ReaderBackgroundColor.toArgb()))
-		//val DisplayedTextColor: MutableLiveData<String> = MutableLiveData(Integer.toHexString(Settings.Instance.ReaderTextColor.toArgb()))
-		//val DisplayedLineHeight: MutableLiveData<Float> = MutableLiveData(Settings.Instance.ReaderLineHeight)
-		//val DisplayedFontSize: MutableLiveData<Float> = MutableLiveData(Settings.Instance.ReaderFontSize)
-	}
-}
-
-
-@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun ReaderSettings() {
 	val fullscreen = remember { mutableStateOf(Storage.Settings.ReaderFullscreen) }
 	val showBatAndTime = remember { mutableStateOf(Storage.Settings.ReaderShowBatteryAndTime) }
-	
-	// "%x".format(number) -> number to hex string
 	
 	val dispBackgroundColor = remember { mutableStateOf(java.lang.Long.toHexString(Storage.Settings.ReaderBackgroundColor)) }
 	val backgroundColor = remember { mutableLongStateOf(Storage.Settings.ReaderBackgroundColor) }
