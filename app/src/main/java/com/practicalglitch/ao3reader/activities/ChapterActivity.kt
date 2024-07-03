@@ -62,7 +62,7 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ireward.htmlcompose.HtmlText
-import com.practicalglitch.ao3reader.Internet
+import com.practicalglitch.ao3reader.Get
 import com.practicalglitch.ao3reader.SavedWork
 import com.practicalglitch.ao3reader.Storage
 import com.practicalglitch.ao3reader.activities.composable.ReaderSettings
@@ -148,7 +148,7 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 	
 	// Downloads chapter
 	LaunchedEffect(!loaded.value) {
-		Internet().DownloadChapter(chapterId.value, chapter, loaded)
+		Get.Chapter(work.value.Work.Id, chapterId.value, chapter, loaded)
 	}
 	
 	// Records seconds read timer

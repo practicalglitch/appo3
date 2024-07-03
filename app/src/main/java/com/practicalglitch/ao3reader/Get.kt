@@ -2,6 +2,8 @@ package com.practicalglitch.ao3reader
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
+import com.google.gson.reflect.TypeToken
+import org.apio3.Types.WorkChapter
 
 class Get {
 	companion object {
@@ -31,6 +33,18 @@ class Get {
 			
 			Log.d("Get", "Getting work ${id} via internet.")
 			Internet().DownloadWorkMetadata(id, out, flip, false, false, true, false)
+		}
+		
+		fun Chapter(wid: String, cid: String, out: MutableState<WorkChapter>, loaded: MutableState<Boolean>? = null){
+			
+			val path = "work_${wid}/ch_${cid}.json"
+			if(FileIO.Exists(path)!!){
+				val json = FileIO.ReadFromFile(path)
+				out.value = LibraryIO.gson.fromJson(json, object : TypeToken<WorkChapter>() {}.type)
+				loaded?.value = true
+			} else {
+				Internet().DownloadChapter(cid, out, loaded)
+			}
 		}
 	}
 }

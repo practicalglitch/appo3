@@ -2,6 +2,7 @@ package com.practicalglitch.ao3reader
 
 import android.util.Log
 import com.google.gson.reflect.TypeToken
+import com.practicalglitch.ao3reader.FileIO.Companion.fDir
 import com.practicalglitch.ao3reader.FileIO.Companion.ls
 import com.practicalglitch.ao3reader.FileIO.Companion.relativePath
 import com.practicalglitch.ao3reader.LibraryIO.Companion.gson
@@ -121,6 +122,25 @@ class Storage {
 				SavedWorkIDs.removeIf { true }
 				SavedWorkIDs.addAll(out)
 			}
+		}
+		
+		fun SaveDownloadedWorkChapters(work: SavedWork) {
+			for(chapter in work.Work.Contents){
+				FileIO.SaveToFile(
+					"work_${work.Work.Id}",
+					"ch_${chapter.ChapterID}.json",
+					LibraryIO.gson.toJson(chapter)
+				)
+			}
+		}
+		
+		fun RemoveDownloadedWorkChapters(work: SavedWork) {
+			val files = File(fDir, "work_${work.Work.Id}").ls()
+			for(file in files)
+				if(file.relativePath().matches(".+ch_[0-9]+\\.json".toRegex()))
+					FileIO.DeleteFile(file.relativePath())
+			for(chapter in work.Work.Contents)
+				chapter.Downloaded = false
 		}
 		
 		// Caches all loaded / downloaded saved works

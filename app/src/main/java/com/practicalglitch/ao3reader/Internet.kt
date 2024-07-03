@@ -131,6 +131,31 @@ class Internet : ComponentActivity() {
 		}
 	}
 	
+	fun DownloadWork(
+		work: SavedWork,
+		returnBool: MutableState<Boolean>? = null,
+		saveWork: Boolean
+	) {
+		lifecycleScope.launch {
+			withContext(Dispatchers.IO) {
+				try {
+					var chapters = ApiO3.DownloadWholeWork(work.Work.Id)
+					for(chapter in chapters) {
+						chapter.Body = chapter.Body.replace("\n", "\n<br>")
+						chapter.Downloaded = true
+					}
+					work.Work.Contents = chapters
+					Storage.SaveDownloadedWorkChapters(work)
+					if(saveWork)
+						Storage.SaveSavedWork(work, false)
+					returnBool?.value = true
+				} catch (e: Exception) {
+					NavigationData.currentSnackbarHostState?.showSnackbar("Failed to download work. Are you connected to the internet?")
+				}
+			}
+		}
+	}
+	
 	
 	/**
 	 * Downloads all fandoms from AO3.

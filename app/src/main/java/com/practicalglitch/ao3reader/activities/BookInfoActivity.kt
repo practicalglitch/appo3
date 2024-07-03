@@ -1,5 +1,6 @@
 package com.practicalglitch.ao3reader.activities
 
+import PopupDialog
 import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.background
@@ -18,6 +19,7 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.foundation.text.selection.SelectionContainer
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.filled.CollectionsBookmark
+import androidx.compose.material.icons.filled.Download
 import androidx.compose.material.icons.filled.ExpandLess
 import androidx.compose.material.icons.filled.ExpandMore
 import androidx.compose.material.icons.filled.Public
@@ -61,6 +63,8 @@ import com.practicalglitch.ao3reader.Get
 import com.practicalglitch.ao3reader.Internet
 import com.practicalglitch.ao3reader.SavedWork
 import com.practicalglitch.ao3reader.Storage
+import com.practicalglitch.ao3reader.TemporarySettings
+import com.practicalglitch.ao3reader.activities.composable.subcomposable.CheckboxSetting
 import com.practicalglitch.ao3reader.activities.composable.subcomposable.SwipeContainer
 import com.practicalglitch.ao3reader.activities.nav.NavigationData
 import com.practicalglitch.ao3reader.activities.nav.Navigator
@@ -107,8 +111,15 @@ fun BookInfoActivity(
 		}
 	}
 	
+	val downloadButtonPressed = remember { mutableStateOf(false) }
+	val workDownloaded = remember { mutableStateOf(false) }
+	LaunchedEffect(workDownloaded.value, downloadButtonPressed.value) {
+		if (workDownloaded.value && downloadButtonPressed.value) {
+			snackbarHostState.showSnackbar("Work downloaded!")
+		}
+	}
+	
 	RederTheme {
-		
 		// This is for the fandom selector
 		val modalBottomSheetState = rememberModalBottomSheetState()
 		val fandomSelectorOpen = remember { mutableStateOf(false) }
@@ -142,8 +153,43 @@ fun BookInfoActivity(
 				Log.d("test", "Contents null!")
 		}
 		
+		val undeletePopupOpen = remember { mutableStateOf(false) }
+		val doNotAskRemoveDownload =
+			remember { mutableStateOf(TemporarySettings.DoNotAskRemoveDownload) }
+		when {
+			undeletePopupOpen.value ->
+				PopupDialog(
+					onDismissRequest = { undeletePopupOpen.value = false },
+					onConfirmation = {
+						Storage.RemoveDownloadedWorkChapters(work.value)
+						workDownloaded.value = false
+						Storage.SaveSavedWork(work.value, false)
+						undeletePopupOpen.value = false
+					},
+					title = "Remove downloaded chapters?",
+					content = {
+						Column {
+							Text(
+								text =
+								"If you do not have internet access, you will not be able to redownload them until you are back online."
+							)
+							CheckboxSetting(
+								"Do not ask again this session",
+								doNotAskRemoveDownload.value
+							) {
+								doNotAskRemoveDownload.value = !doNotAskRemoveDownload.value
+								TemporarySettings.DoNotAskRemoveDownload =
+									doNotAskRemoveDownload.value
+							}
+						}
+					}
+				)
+		}
+		
 		if (workLoaded.value && work.value.Work != null) {
 			
+			// has to be here because if it's earlier it will null out
+			workDownloaded.value = work.value.Work.Contents.none { !it.Downloaded }
 			
 			Scaffold(
 				snackbarHost = {
@@ -382,9 +428,34 @@ fun BookInfoActivity(
 										selectedIconColor = MaterialTheme.colorScheme.primary,
 										indicatorColor = MaterialTheme.colorScheme.background
 									),
-									icon = { Icon(Icons.Outlined.Download, "Download") },
-									label = { Text("Download") },
-									onClick = { /*TODO*/ }
+									icon = { Icon(
+										if(workDownloaded.value)
+											Icons.Filled.Download
+										else
+											Icons.Outlined.Download,
+										"Download/Undownload Work") },
+									label = { Text(
+										if(workDownloaded.value)
+											"Downloaded"
+										else
+											"Download"
+									) },
+									onClick = {
+										if(!workDownloaded.value) {
+											downloadButtonPressed.value = true
+											Internet().DownloadWork(work.value, workDownloaded, true)
+											}
+										else {
+											// Undownload a work
+											if(!doNotAskRemoveDownload.value)
+												undeletePopupOpen.value = true
+											else {
+												Storage.RemoveDownloadedWorkChapters(work.value)
+												workDownloaded.value = false
+												Storage.SaveSavedWork(work.value, false)
+											}
+										}
+									}
 								)
 							}
 							
