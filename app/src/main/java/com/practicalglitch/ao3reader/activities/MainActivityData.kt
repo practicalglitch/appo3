@@ -26,7 +26,6 @@ import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Close
 import androidx.compose.material.icons.filled.History
-import androidx.compose.material.icons.filled.Menu
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Update
@@ -173,12 +172,11 @@ fun MainActivity(navController: NavController?) {
 					title = {
 						Text("Library", maxLines = 1, overflow = TextOverflow.Ellipsis)
 					},
-					navigationIcon = {
+					/*navigationIcon = {
 						IconButton(onClick = { /*TODO*/ }) {
 							Icon(Icons.Default.Menu, "Menu")
 						}
-					},
-					//Double check this. What would this button do?
+					},*/
 					actions = {
 						IconButton(onClick = {
 							navController!!.navigate(Screen.SettingsActivity.route)
