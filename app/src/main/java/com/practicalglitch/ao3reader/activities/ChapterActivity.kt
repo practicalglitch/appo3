@@ -62,13 +62,13 @@ import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
 import androidx.navigation.NavController
 import com.ireward.htmlcompose.HtmlText
+import com.practicalglitch.ao3reader.Fonts
 import com.practicalglitch.ao3reader.Get
 import com.practicalglitch.ao3reader.SavedWork
 import com.practicalglitch.ao3reader.Storage
 import com.practicalglitch.ao3reader.activities.composable.ReaderSettings
 import com.practicalglitch.ao3reader.activities.composable.subcomposable.DefaultScrollSettings
 import com.practicalglitch.ao3reader.activities.nav.Navigator
-import com.practicalglitch.ao3reader.ui.theme.ArbutusSlabFontFamily
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
@@ -174,6 +174,9 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 		}
 	}
 	
+	
+	
+	
 	// If the menu isn't open and the user clicks back,
 	// First open the menu.
 	// If they click back again, it exits normally.
@@ -265,7 +268,7 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 										lineHeight = 30.sp,
 										fontWeight = FontWeight.Bold,
 										modifier = Modifier.padding(15.dp),
-										fontFamily = ArbutusSlabFontFamily
+										fontFamily = Fonts.GetFont()
 									)
 									if (chapter.value.Summary != null && !chapter.value.Summary.equals(
 											""
@@ -279,7 +282,7 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 											lineHeight = Storage.Settings.ReaderLineHeight.sp,
 											fontSize = Storage.Settings.ReaderFontSize.sp,
 											modifier = Modifier.padding(10.dp),
-											fontFamily = ArbutusSlabFontFamily
+											fontFamily = Fonts.GetFont()
 										)
 										HtmlText(
 											text = chapter.value.Summary,
@@ -287,7 +290,7 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 												color = Color(Storage.Settings.ReaderTextColor),
 												lineHeight = Storage.Settings.ReaderLineHeight.sp,
 												fontSize = Storage.Settings.ReaderFontSize.sp,
-												fontFamily = ArbutusSlabFontFamily
+												fontFamily = Fonts.GetFont()
 											),
 											modifier = Modifier.padding(10.dp)
 										)
@@ -304,7 +307,7 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 											fontSize = Storage.Settings.ReaderFontSize.sp,
 											fontWeight = FontWeight.Bold,
 											modifier = Modifier.padding(10.dp),
-											fontFamily = ArbutusSlabFontFamily
+											fontFamily = Fonts.GetFont()
 										)
 										HtmlText(
 											text = chapter.value.StartNotes,
@@ -312,7 +315,7 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 												color = Color(Storage.Settings.ReaderTextColor),
 												lineHeight = Storage.Settings.ReaderLineHeight.sp,
 												fontSize = Storage.Settings.ReaderFontSize.sp,
-												fontFamily = ArbutusSlabFontFamily
+												fontFamily = Fonts.GetFont()
 											),
 											modifier = Modifier.padding(10.dp)
 										)
@@ -323,7 +326,7 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 											color = Color(Storage.Settings.ReaderTextColor),
 											lineHeight = Storage.Settings.ReaderLineHeight.sp,
 											fontSize = Storage.Settings.ReaderFontSize.sp,
-											fontFamily = ArbutusSlabFontFamily
+											fontFamily = Fonts.GetFont()
 										),
 										modifier = Modifier.padding(10.dp)
 									)
@@ -339,7 +342,7 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 											fontSize = Storage.Settings.ReaderFontSize.sp,
 											fontWeight = FontWeight.Bold,
 											modifier = Modifier.padding(10.dp),
-											fontFamily = ArbutusSlabFontFamily
+											fontFamily = Fonts.GetFont()
 										)
 										HtmlText(
 											text = chapter.value.EndNotes,
@@ -347,7 +350,7 @@ fun ChapterActivity(navController: NavController?, savedWork: SavedWork, inChapt
 												color = Color(Storage.Settings.ReaderTextColor),
 												lineHeight = Storage.Settings.ReaderLineHeight.sp,
 												fontSize = Storage.Settings.ReaderFontSize.sp,
-												fontFamily = ArbutusSlabFontFamily
+												fontFamily = Fonts.GetFont()
 											),
 											modifier = Modifier.padding(10.dp)
 										)

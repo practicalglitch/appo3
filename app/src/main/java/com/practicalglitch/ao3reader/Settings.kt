@@ -2,8 +2,8 @@ package com.practicalglitch.ao3reader
 
 import androidx.compose.ui.text.style.TextAlign
 
+// Settings that will be stored in memory
 class Settings {
-	
 	var ReaderFullscreen: Boolean = true
 	var ReaderShowBatteryAndTime: Boolean = true
 	var ReaderBackgroundColor: Long = 0xFF000000 // Pure black
@@ -11,6 +11,9 @@ class Settings {
 	var ReaderLineHeight: Float = 18f
 	var ReaderFontSize: Float = 14f
 	var ReaderTextAlignment: TextAlign = TextAlign.Left
+	
+	var ReaderFontFamily: String = "res:arbutus_slab_regular"
+	var ReaderFontFamilyName: String = "Arbutus Slab Regular"
 	
 	
 	var GeneralStatsEnabled: Boolean = true
@@ -21,8 +24,10 @@ class Settings {
 	}
 }
 
+// Settings that only last for the session
 class TemporarySettings {
 	companion object {
 		var DoNotAskRemoveDownload = false
+		var DoNotAskRemoveFont = false
 	}
 }

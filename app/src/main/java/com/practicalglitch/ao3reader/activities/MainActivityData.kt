@@ -138,9 +138,7 @@ fun MainActivity(navController: NavController?) {
 	val snackbarHostState = makeSnackbarHost()
 	
 	val bootup = remember { mutableStateOf(false) }
-	
 	if(!bootup.value){
-		
 		// Load saved work ids an
 		Storage.LoadSavedWorkIDs()
 		Storage.SavedWorkIDs.forEach { savedWorkIDs.add(it) }
@@ -149,7 +147,6 @@ fun MainActivity(navController: NavController?) {
 		Storage.LoadNewChapters()
 		Storage.LoadStatistics()
 		Storage.LoadSettings()
-		
 		
 		bootup.value = true
 	}
@@ -162,6 +159,10 @@ fun MainActivity(navController: NavController?) {
 			MainActivityData.openInAppWorkID = ""
 		}
 	}
+	
+	
+	
+	
 	
 	
 	RederTheme {
