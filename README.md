@@ -18,6 +18,8 @@ It has the following features:
 
 AppO3 is fully open source and privacy-respecting. No data is collected, we never ask for a login or signup, and never will.
 
-AppO3 is currently in beta and is not entirely stable. Please report any bugs, and use it at your own risk. You have been warned.
+AppO3 is currently in pre-alpha and is not entirely stable. Please report any bugs, and use it at your own risk. You have been warned.
+
+You can either wait until it is out or build it yourself from source.
 
 (AppO3 is in no way affiliated with the developers of AO3. AppO3 is a standalone project.)
