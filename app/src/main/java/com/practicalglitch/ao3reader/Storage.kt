@@ -7,6 +7,7 @@ import com.practicalglitch.ao3reader.FileIO.Companion.ls
 import com.practicalglitch.ao3reader.FileIO.Companion.relativePath
 import com.practicalglitch.ao3reader.LibraryIO.Companion.gson
 import com.practicalglitch.ao3reader.activities.MainActivityData
+import org.apio3.Types.Fandom
 import org.apio3.Types.Work
 import org.apio3.Types.WorkChapter
 import java.io.File
@@ -85,6 +86,11 @@ class ChapterMeta(chapter: WorkChapter) {
 		chapter.ChapterIndex = indx
 		chapter.UploadDate = dt
 	}
+}
+
+class FandomsListSave(fandoms: Array<Fandom>, ts: Long) {
+	var fandoms: Array<Fandom> = fandoms
+	var timestamp: Long = ts
 }
 
 class Storage {
@@ -397,6 +403,30 @@ class Storage {
 				Settings = LibraryIO.gson.fromJson(json, object : TypeToken<Settings>() {}.type)
 			}
 		}
+		
+		val FandomsList = mutableListOf<Fandom>()
+		var FandomsListTimestamp: Long = 0
+		
+		fun SaveFandomsList(): Boolean {
+			Log.d("Data", "Saving Fandoms List")
+			val json = gson.toJson(FandomsListSave(FandomsList.toTypedArray(), System.currentTimeMillis() / 1000))
+			return FileIO.SaveToFile("", "fandoms_list.json", json)
+		}
+		
+		fun LoadFandomsList() {
+			Log.d("Data", "Loading Fandoms List")
+			FileIO.ifExists("fandoms_list.json") { file ->
+				val json = FileIO.ReadFromFile(file)
+				val out = gson.fromJson<FandomsListSave>(
+					json,
+					object : TypeToken<FandomsListSave>() {}.type
+				)
+				FandomsList.removeIf { true }
+				FandomsList.addAll(out.fandoms)
+				FandomsListTimestamp = out.timestamp
+			}
+		}
+		
 		
 		
 		fun ExportBackup(info: BackupInfo): File {

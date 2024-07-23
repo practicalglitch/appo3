@@ -19,7 +19,6 @@ class Internet : ComponentActivity() {
 	
 	companion object {
 		// Caches
-		var allFandoms = mutableListOf<Fandom>()
 		val getWorkMetadataMutex = Mutex()
 	}
 	
@@ -166,29 +165,20 @@ class Internet : ComponentActivity() {
 	 * @param getCached If true, accepts a cached copy, if exists.
 	 */
 	fun DownloadAllFandoms(
-		state: MutableList<Fandom>,
-		flip: MutableState<Boolean>,
-		getCached: Boolean = true
+		state: SnapshotStateList<Fandom>
 	) {
-		if (getCached && allFandoms.size != 0) {
-			if (state != allFandoms) {
-				state.removeAll { true }
-				state.addAll(allFandoms)
-			}
-			flip.value = true
-		} else {
-			lifecycleScope.launch {
-				withContext(Dispatchers.IO) {
-					val fandoms = ApiO3.GetAllFandoms()
-					if(fandoms == null){
-						NavigationData.currentSnackbarHostState?.showSnackbar("Unable to get fandoms. Are you sure you are connected to the internet?")
-						return@withContext
-					}
-					allFandoms.addAll(fandoms)
-					Log.d("s", "from online: ${fandoms.size}, ${allFandoms.size}")
-					state.addAll(fandoms)
-					flip.value = true
+		lifecycleScope.launch {
+			withContext(Dispatchers.IO) {
+				val fandoms = ApiO3.GetAllFandoms()
+				if (fandoms == null) {
+					NavigationData.currentSnackbarHostState?.showSnackbar("Unable to get fandoms. Are you sure you are connected to the internet?")
+					return@withContext
 				}
+				state.addAll(fandoms)
+				
+				Storage.FandomsList.removeIf { true }
+				Storage.FandomsList.addAll(fandoms)
+				Storage.SaveFandomsList()
 			}
 		}
 	}

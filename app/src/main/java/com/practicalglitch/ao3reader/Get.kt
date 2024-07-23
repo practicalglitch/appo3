@@ -2,7 +2,9 @@ package com.practicalglitch.ao3reader
 
 import android.util.Log
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.snapshots.SnapshotStateList
 import com.google.gson.reflect.TypeToken
+import org.apio3.Types.Fandom
 import org.apio3.Types.WorkChapter
 
 class Get {
@@ -45,6 +47,16 @@ class Get {
 			} else {
 				Internet().DownloadChapter(cid, out, loaded)
 			}
+		}
+		
+		fun FandomsList(out: SnapshotStateList<Fandom>) {
+			// Call for a refresh every 72hrs
+			if(Storage.FandomsListTimestamp < (System.currentTimeMillis() / 1000) + 259200){
+				out.addAll(Storage.FandomsList)
+			} else {
+				Internet().DownloadAllFandoms(out)
+			}
+			
 		}
 	}
 }

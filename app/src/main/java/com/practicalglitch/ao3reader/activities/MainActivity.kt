@@ -49,19 +49,17 @@ import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
-import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.practicalglitch.ao3reader.Get
 import com.practicalglitch.ao3reader.Internet
 import com.practicalglitch.ao3reader.Library
 import com.practicalglitch.ao3reader.Save
 import com.practicalglitch.ao3reader.Storage
-import com.practicalglitch.ao3reader.activities.Discovery.Companion.DisplayFandomList
-import com.practicalglitch.ao3reader.activities.Discovery.Companion.FandomList
 import com.practicalglitch.ao3reader.activities.composable.FandomCard
 import com.practicalglitch.ao3reader.activities.composable.NewChapterCard
 import com.practicalglitch.ao3reader.activities.nav.Navigation
@@ -151,6 +149,7 @@ fun MainActivity(navController: NavController?) {
 		newChapters.addAll(Storage.NewChapters.reversed())
 		Storage.LoadStatistics()
 		Storage.LoadSettings()
+		Storage.LoadFandomsList()
 		
 		bootup.value = true
 	}
@@ -285,13 +284,6 @@ fun MainActivity(navController: NavController?) {
 	}
 }
 
-class Discovery {
-	companion object{
-		var FandomList: MutableList<Fandom> = mutableListOf()
-		var DisplayFandomList: SnapshotStateList<Fandom> = SnapshotStateList();
-	}
-}
-
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
 fun Discovery(
@@ -305,7 +297,6 @@ fun Discovery(
 	var searchHistory = remember {
 		mutableStateListOf( "_PLACEHOLDER_LIST")
 	}
-	val readyToSearch = remember { mutableStateOf(false) }
 	if(searchHistory.contains("_PLACEHOLDER_LIST") && searchHistory.size == 1) {
 		searchHistory.remove("_PLACEHOLDER_LIST");
 		val loadedSeachHistory = Save.LoadSearchHistory();
@@ -315,6 +306,9 @@ fun Discovery(
 		}
 	}
 	
+	val fandoms = remember { mutableStateListOf<Fandom>() }
+	val filteredList = remember { mutableStateListOf<Fandom>() }
+	
 	Column (
 		modifier = Modifier.fillMaxWidth(),
 		horizontalAlignment = Alignment.CenterHorizontally
@@ -322,7 +316,6 @@ fun Discovery(
 		SearchBar(
 			query = text,
 			onQueryChange = { text = it
-				readyToSearch.value = false
 				},
 			onSearch = {
 				query = it;
@@ -338,9 +331,7 @@ fun Discovery(
 				
 				loading.value = true
 				
-				// REAL stuff
-				// TODO: CACHE FANDOMS PLEASE
-				Internet().DownloadAllFandoms(FandomList, readyToSearch, true)
+				Get.FandomsList(fandoms)
 			},
 			active = active,
 			onActiveChange = { active = it },
@@ -388,27 +379,27 @@ fun Discovery(
 			Text(text = "Loading, please note this may take a while...")
 		}
 		
-		if(readyToSearch.value){
+		if(fandoms.size != 0){
 			loading.value = false
 			if(query != lastquery) {
-				DisplayFandomList.removeRange(0, DisplayFandomList.size)
+				filteredList.removeIf { true }
 				Log.d("Search", "Starting search...")
 				// TODO: Fuzzy Search
 				// IT WORKS OKAY
 				val queryLower = query.lowercase().filterNot { it.isWhitespace() }
 				val list =
-					FandomList.filter { fandom -> fandom.Name
+					fandoms.filter { fandom -> fandom.Name
 						.lowercase(Locale.getDefault())
 						.filterNot { it.isWhitespace() }
 						.contains(queryLower) }
 						.toMutableList()
-				Log.d("Search", "Found ${list.size} matches from ${FandomList.size} fandoms.")
+				Log.d("Search", "Found ${list.size} matches from ${fandoms.size} fandoms.")
 				list.sortBy { fandom -> fandom.WorksCount }
 				list.reverse()
 				while (list.size > 25)
 					list.removeAt(24)
 				Log.d("Search", "Displaying ${list.size} fandoms...")
-				DisplayFandomList.addAll(list)
+				filteredList.addAll(list)
 				lastquery = query
 			} else {
 				Log.d("Search", "Query same as last. ${query}, ${lastquery}. Skipped")
@@ -419,7 +410,7 @@ fun Discovery(
 					.padding(vertical = 6.dp)
 			) {
 				items(
-					items = DisplayFandomList
+					items = filteredList
 				) { fandom -> FandomCard(navController, fandom) }
 			}
 		}
