@@ -160,11 +160,6 @@ fun MainActivity(navController: NavController?) {
 		}
 	}
 	
-	
-	
-	
-	
-	
 	RederTheme {
 		Scaffold (
 			snackbarHost = { SnackbarHost(hostState = snackbarHostState)},
@@ -173,11 +168,6 @@ fun MainActivity(navController: NavController?) {
 					title = {
 						Text("Library", maxLines = 1, overflow = TextOverflow.Ellipsis)
 					},
-					/*navigationIcon = {
-						IconButton(onClick = { /*TODO*/ }) {
-							Icon(Icons.Default.Menu, "Menu")
-						}
-					},*/
 					actions = {
 						IconButton(onClick = {
 							navController!!.navigate(Screen.SettingsActivity.route)
@@ -287,7 +277,7 @@ fun MainActivity(navController: NavController?) {
 	}
 }
 
-class Discovery{
+class Discovery {
 	companion object{
 		var FandomList: MutableList<Fandom> = mutableListOf()
 		var DisplayFandomList: SnapshotStateList<Fandom> = SnapshotStateList();
@@ -325,7 +315,6 @@ fun Discovery(
 			query = text,
 			onQueryChange = { text = it
 				readyToSearch.value = false
-							//display = false
 				},
 			onSearch = {
 				query = it;
@@ -342,6 +331,7 @@ fun Discovery(
 				loading.value = true
 				
 				// REAL stuff
+				// TODO: CACHE FANDOMS PLEASE
 				Internet().DownloadAllFandoms(FandomList, readyToSearch, true)
 			},
 			active = active,
