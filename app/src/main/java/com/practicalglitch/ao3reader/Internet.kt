@@ -150,6 +150,7 @@ class Internet : ComponentActivity() {
 						Storage.SaveSavedWork(work, false)
 					returnBool?.value = true
 				} catch (e: Exception) {
+					Log.d("Debug", "Failed to download work ${work.Work.Id} with reason: ${e}")
 					NavigationData.currentSnackbarHostState?.showSnackbar("Failed to download work. Are you connected to the internet?")
 				}
 			}
