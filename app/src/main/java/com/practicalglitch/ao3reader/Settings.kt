@@ -4,6 +4,8 @@ import androidx.compose.ui.text.style.TextAlign
 
 // Settings that will be stored in memory
 class Settings {
+	
+	// Reader Settings
 	var ReaderFullscreen: Boolean = true
 	var ReaderShowBatteryAndTime: Boolean = true
 	var ReaderBackgroundColor: Long = 0xFF000000 // Pure black
@@ -16,7 +18,10 @@ class Settings {
 	var ReaderFontFamilyName: String = "Arbutus Slab Regular"
 	
 	
+	
+	// General
 	var GeneralStatsEnabled: Boolean = true
+	var GeneralLastKnownVersion: Int = -1
 	
 	//var ReaderFont: Font
 	companion object {

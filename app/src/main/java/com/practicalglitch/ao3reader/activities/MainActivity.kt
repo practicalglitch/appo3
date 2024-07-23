@@ -1,6 +1,7 @@
 package com.practicalglitch.ao3reader.activities
 
 import LibraryWorkCard
+import PopupDialog
 import android.annotation.SuppressLint
 import android.content.Intent
 import android.content.res.Configuration
@@ -55,6 +56,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.practicalglitch.ao3reader.BuildConfig
 import com.practicalglitch.ao3reader.Get
 import com.practicalglitch.ao3reader.Internet
 import com.practicalglitch.ao3reader.Library
@@ -62,6 +64,7 @@ import com.practicalglitch.ao3reader.Save
 import com.practicalglitch.ao3reader.Storage
 import com.practicalglitch.ao3reader.activities.composable.FandomCard
 import com.practicalglitch.ao3reader.activities.composable.NewChapterCard
+import com.practicalglitch.ao3reader.activities.composable.subcomposable.ShowChangelog
 import com.practicalglitch.ao3reader.activities.nav.Navigation
 import com.practicalglitch.ao3reader.activities.nav.NavigationData
 import com.practicalglitch.ao3reader.activities.nav.Navigator
@@ -135,6 +138,8 @@ fun MainActivity(navController: NavController?) {
 	val updateProgress = remember { mutableStateOf(-1) }
 	val newChapters = remember { mutableStateListOf<WorkChapter>() }
 	
+	val startupDialogue = remember { mutableStateOf(false) }
+	
 	val snackbarHostState = makeSnackbarHost()
 	
 	val bootup = remember { mutableStateOf(false) }
@@ -164,6 +169,27 @@ fun MainActivity(navController: NavController?) {
 	}
 	
 	RederTheme {
+		
+		if(Storage.Settings.GeneralLastKnownVersion != BuildConfig.VERSION_CODE)
+			startupDialogue.value = true
+		
+		// Startup dialogue
+		when { startupDialogue.value ->
+			PopupDialog(
+				onConfirmation = {
+					startupDialogue.value = false
+					Storage.Settings.GeneralLastKnownVersion = BuildConfig.VERSION_CODE
+					Storage.SaveSettings()
+								 },
+				confirmText = "OK",
+				hasDismissText = false,
+				title = "Welcome!",
+				content = {
+					ShowChangelog(lastVer = Storage.Settings.GeneralLastKnownVersion, curVer = BuildConfig.VERSION_CODE)
+				}
+			)
+		}
+		
 		Scaffold (
 			snackbarHost = { SnackbarHost(hostState = snackbarHostState)},
 			topBar = {

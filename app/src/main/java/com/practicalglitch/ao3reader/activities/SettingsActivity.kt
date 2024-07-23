@@ -234,28 +234,32 @@ fun ClickableText(text: String, subtext: String = "", onClick: () -> Unit){
 
 @Composable
 fun PopupDialog(
-	onDismissRequest: () -> Unit,
+	onDismissRequest: (() -> Unit)? = null,
 	onConfirmation: () -> Unit,
 	title: String,
 	content: @Composable () -> Unit,
 	confirmText: String = "Confirm",
-	dismissText: String = "Cancel"
+	dismissText: String = "Cancel",
+	hasDismissText: Boolean = true
 	){
 	AlertDialog(
 		title = { Text(text = title) },
 		text = {
 			content.invoke()
 		},
-		onDismissRequest = { onDismissRequest.invoke() },
+		onDismissRequest = { onDismissRequest?.invoke() },
 		confirmButton = {
 			TextButton(onClick = { onConfirmation.invoke() }) {
 				Text(text = confirmText)
 			}
 		},
 		dismissButton = {
-			TextButton(onClick = { onDismissRequest.invoke() }) {
-				Text(text = dismissText)
-			}
+				if(hasDismissText) {
+				TextButton(onClick = { onDismissRequest?.invoke() }) {
+					Text(text = dismissText)
+				}
+			} else
+				null
 		}
 	)
 }
