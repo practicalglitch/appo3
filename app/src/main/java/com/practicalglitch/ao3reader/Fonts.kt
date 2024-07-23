@@ -59,7 +59,12 @@ object Fonts {
 		
 		val pairs = mutableListOf<Pair<String, String>>()
 		
-		File(FileIO.fDir, "fonts").ls().forEach { ufont ->
+		val fontpath = File(FileIO.fDir, "fonts")
+		
+		if(!fontpath.exists())
+			fontpath.mkdirs()
+		
+		fontpath.ls().forEach { ufont ->
 			val name = ufont.relativePath().removePrefix("fonts/")
 				.removeSuffix(".ttf")
 				.removeSuffix(".otf")
