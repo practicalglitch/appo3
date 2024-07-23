@@ -560,8 +560,11 @@ class Storage {
 			if(info.newChapters)
 				// Should not be performed if newchapters already contain chapters
 				FileIO.ifExists("restore/new_chapters.json") { file ->
-					Storage.NewChapters.addAll(gson.fromJson(FileIO.ReadFromFile(file),
-						object : TypeToken<Array<WorkChapter>>() {}.type))
+					val out: Array<WorkChapter> = gson.fromJson(FileIO.ReadFromFile(file),
+						object : TypeToken<Array<WorkChapter>>() {}.type)
+					
+					for(item in out)
+						Storage.NewChapters.add(item)
 					Storage.SaveNewChapters()
 				}
 
