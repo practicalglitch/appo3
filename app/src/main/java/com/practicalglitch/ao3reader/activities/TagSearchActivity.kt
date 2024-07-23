@@ -132,7 +132,7 @@ fun TagSearchActivity (
 fun SearchThrobber() {
 	// TODO: make a throbber
 	// what a dumb name btw
-	Text(text = "LOADING!!!!")
+	Text(text = "Loading works, please wait...")
 }
 
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark Mode")

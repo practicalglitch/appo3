@@ -48,6 +48,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.lifecycle.MutableLiveData
 import androidx.navigation.NavController
+import com.practicalglitch.ao3reader.BuildConfig
 import com.practicalglitch.ao3reader.FileIO.Companion.fDir
 import com.practicalglitch.ao3reader.Statistics
 import com.practicalglitch.ao3reader.Storage
@@ -316,15 +317,17 @@ fun AboutPage(){
 			Column {
 				Text(
 					modifier = Modifier.padding(15.dp),
-					text = "AppO3 is Free and Open Source Software distributed under the GPL-3.0.\nAppO3 is not in any way associated with the owner(s) or developer(s) of Archive of Our Own.", textAlign = TextAlign.Center)
-				ClickableText(text = "Version", subtext = "v0.0.1") {
-				
+					text = "AppO3 is Free and Open Source Software distributed under the GPL-3.0." +
+							"\nAppO3 is not in any way associated with the owner(s) or " +
+							"developer(s) of Archive of Our Own.", textAlign = TextAlign.Center)
+				ClickableText(text = "Check For New Updates", subtext = "Current Version: v${BuildConfig.VERSION_NAME}") {
+					uriHandler.openUri("https://github.com/practicalglitch/appo3/releases")
 				}
 				ClickableText(text = "Source Code", subtext = "Hosted on GitHub") {
 					uriHandler.openUri("https://github.com/practicalglitch/appo3")
 				}
 				ClickableText(text = "Privacy Policy", subtext = "TL;DR We don't collect anything.") {
-					uriHandler.openUri("https://github.com/practicalglitch/appo3/blob/main/README.md")
+					uriHandler.openUri("https://github.com/practicalglitch/appo3/blob/main/PRIVACY.md")
 				}
 			}
 		}

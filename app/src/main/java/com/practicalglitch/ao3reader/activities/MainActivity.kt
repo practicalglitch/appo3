@@ -376,7 +376,7 @@ fun Discovery(
 		}
 		
 		if(loading.value) {
-			Text(text = "Loading, please note this may take a while...")
+			Text(text = "Downloading fandoms, please note this may take upwards of a minute...")
 		}
 		
 		if(fandoms.size != 0){
