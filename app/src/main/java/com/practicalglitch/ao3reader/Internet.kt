@@ -186,7 +186,7 @@ class Internet : ComponentActivity() {
 	
 	fun UpdateSavedWorks(
 		progress: MutableState<Int>,
-		list: SnapshotStateList<WorkChapter>
+		newWorksList: SnapshotStateList<WorkChapter>
 	) {
 		
 		val works = Storage.SavedWorkIDs
@@ -224,12 +224,14 @@ class Internet : ComponentActivity() {
 					for (onlineChapter in onlineChapters) {
 						if (!savedChapterIDs.contains(onlineChapter.ChapterID)) {
 							// There was a change!
+							val isWorkDownloaded = sWork.Work.Contents.none { !it.Downloaded }
+							
 							
 							// If it does not exist in the NewChapter array yet
 							// Add it to it
 							if ((Storage.NewChapters.filter { ch -> ch.ChapterID == onlineChapter.ChapterID }).isEmpty()) {
 								Storage.NewChapters.add(onlineChapter)
-								list.add(onlineChapter)
+								newWorksList.add(onlineChapter)
 								Log.d(
 									"Update",
 									"Found update for ${sWork.Work.Id}, ${sWork.Work.Title}: ${onlineChapter.ChapterID}, ${onlineChapter.Title}"
@@ -245,6 +247,14 @@ class Internet : ComponentActivity() {
 									true,
 									false
 								)
+								
+								if(isWorkDownloaded) {
+									ApiO3.DownloadSingleChapter(onlineChapter)
+									onlineChapter.Body = onlineChapter.Body.replace("\n", "\n<br>")
+									onlineChapter.Downloaded = true
+									Storage.SaveDownloadedWorkChapters(sWork)
+								}
+								
 							} else {
 								Log.d(
 									"Update",
