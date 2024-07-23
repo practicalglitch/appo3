@@ -3,6 +3,7 @@ package com.practicalglitch.ao3reader
 import android.util.Log
 import androidx.activity.ComponentActivity
 import androidx.compose.runtime.MutableState
+import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.snapshots.SnapshotStateList
 import androidx.lifecycle.lifecycleScope
 import com.practicalglitch.ao3reader.activities.nav.NavigationData
@@ -192,7 +193,10 @@ class Internet : ComponentActivity() {
 		}
 	}
 	
-	fun UpdateSavedWorks(progress: MutableState<Int>) {
+	fun UpdateSavedWorks(
+		progress: MutableState<Int>,
+		list: SnapshotStateList<WorkChapter>
+	) {
 		
 		val works = Storage.SavedWorkIDs
 		
@@ -210,7 +214,7 @@ class Internet : ComponentActivity() {
 				for (sWork in SavedWorks) {
 					
 					Log.d("Update", "Updating work ${sWork.Work.Id}, ${sWork.Work.Title}...")
-					
+					progress.value += 1
 					
 					val onlineChapters = ApiO3.GetChapterMetadatas(sWork.Work.Id)
 					
@@ -234,9 +238,21 @@ class Internet : ComponentActivity() {
 							// Add it to it
 							if ((Storage.NewChapters.filter { ch -> ch.ChapterID == onlineChapter.ChapterID }).isEmpty()) {
 								Storage.NewChapters.add(onlineChapter)
+								list.add(onlineChapter)
 								Log.d(
 									"Update",
 									"Found update for ${sWork.Work.Id}, ${sWork.Work.Title}: ${onlineChapter.ChapterID}, ${onlineChapter.Title}"
+								)
+								// Trigger a refresh of info
+								// Notably updates # of available chapters and completion
+								DownloadWorkMetadata(
+									sWork.Work.Id,
+									mutableStateOf(sWork),
+									mutableStateOf(false),
+									false,
+									false,
+									true,
+									false
 								)
 							} else {
 								Log.d(
@@ -253,7 +269,6 @@ class Internet : ComponentActivity() {
 							Storage.SaveNewChapters()
 						}
 					}
-					progress.value += 1
 				}
 			}
 		}

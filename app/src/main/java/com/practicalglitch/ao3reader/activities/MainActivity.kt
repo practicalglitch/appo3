@@ -70,6 +70,7 @@ import com.practicalglitch.ao3reader.activities.nav.Navigator
 import com.practicalglitch.ao3reader.activities.nav.Screen
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import org.apio3.Types.Fandom
+import org.apio3.Types.WorkChapter
 import rememberForeverLazyListState
 import java.io.File
 import java.util.Locale
@@ -131,9 +132,10 @@ fun MainActivity(navController: NavController?) {
 	// state 1 -> recent
 	// state 2 -> discover
 	val activityState = remember { mutableStateOf(0) }
-	val updateProgress = remember { mutableStateOf(-1) }
-	val chapterUpdateStatus = remember { mutableStateOf(0) }
 	val savedWorkIDs = remember { mutableListOf<String>() }
+	
+	val updateProgress = remember { mutableStateOf(-1) }
+	val newChapters = remember { mutableStateListOf<WorkChapter>() }
 	
 	val snackbarHostState = makeSnackbarHost()
 	
@@ -145,6 +147,8 @@ fun MainActivity(navController: NavController?) {
 
 		Storage.LoadHistory()
 		Storage.LoadNewChapters()
+		// sync recomposing value with storage
+		newChapters.addAll(Storage.NewChapters.reversed())
 		Storage.LoadStatistics()
 		Storage.LoadSettings()
 		
@@ -239,10 +243,14 @@ fun MainActivity(navController: NavController?) {
 									.padding(30.dp, 10.dp),
 								onClick = {
 									Internet().UpdateSavedWorks(
-										chapterUpdateStatus
+										updateProgress,
+										newChapters
 									)
 								}
 							) {
+								Log.d(
+									"e", "${updateProgress.value}"
+								)
 								Text(
 									text =
 									if (updateProgress.value == -1)
@@ -250,12 +258,12 @@ fun MainActivity(navController: NavController?) {
 									else if (updateProgress.value == savedWorkIDs.size)
 										"Update finished"
 									else
-										"Updating ${updateProgress}/${savedWorkIDs.size}"
+										"Updating ${updateProgress.value}/${savedWorkIDs.size}"
 								)
 							}
 						}
 						items(
-							items = Storage.NewChapters.reversed()
+							items = newChapters
 						) { chap -> NewChapterCard(navController, chap) }
 					}
 				}
