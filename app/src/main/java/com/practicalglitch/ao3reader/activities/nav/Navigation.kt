@@ -23,6 +23,7 @@ class NavigationData {
 		var BookInfo_workId: String = ""
 		
 		var WebViewActivity_url: String = ""
+		var WebViewActivity_ReplaceTitle: String? = null
 		
 		var ChapterActivity_savedWork: SavedWork = SavedWork()
 		var ChapterActivity_chapterId: String = ""
@@ -44,8 +45,9 @@ class Navigator {
 			navController.navigate(Screen.ChapterActivity.route)
 		}
 		
-		fun ToWebViewActivity(navController: NavController, url: String){
+		fun ToWebViewActivity(navController: NavController, url: String, replacedTitle: String? = null){
 			NavigationData.WebViewActivity_url = url
+			NavigationData.WebViewActivity_ReplaceTitle = replacedTitle
 			navController.navigate(Screen.WebViewActivity.route)
 		}
 		
@@ -79,7 +81,7 @@ fun Navigation() {
 				NavigationData.ChapterActivity_chapterId)
 		}
 		composable(route = Screen.WebViewActivity.route) {
-			WebViewActivity(NavigationData.WebViewActivity_url)
+			WebViewActivity(NavigationData.WebViewActivity_url, NavigationData.WebViewActivity_ReplaceTitle)
 		}
 		composable(route = Screen.TagSearchActivity.route) {
 			TagSearchActivity(

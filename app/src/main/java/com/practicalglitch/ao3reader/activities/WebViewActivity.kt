@@ -52,7 +52,7 @@ import com.practicalglitch.ao3reader.ui.theme.RederTheme
 )
 @Composable
 fun WebViewActivityPreview(){
-	WebViewActivity(url = "https://archiveofourown.org/works/52388716", true)
+	WebViewActivity(url = "https://archiveofourown.org/works/52388716", null, true)
 }
 
 @SuppressLint("SetJavaScriptEnabled")
@@ -60,6 +60,7 @@ fun WebViewActivityPreview(){
 @Composable
 fun WebViewActivity(
 	url: String,
+	replacedTitle: String? = null,
 	preview: Boolean = false
 ) {
 	var backEnabled by remember { mutableStateOf(false) }
@@ -94,7 +95,7 @@ fun WebViewActivity(
 									verticalArrangement = Arrangement.SpaceBetween
 								) {
 									Text(
-										text = title,
+										text = replacedTitle?: title,
 										softWrap = false,
 										maxLines = 1,
 										style = MaterialTheme.typography.labelLarge,

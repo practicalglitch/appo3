@@ -21,7 +21,9 @@ class Settings {
 	
 	// General
 	var GeneralStatsEnabled: Boolean = true
+	var GeneralShowUpdateReminder: Boolean = true
 	var GeneralLastKnownVersion: Int = -1
+	var GeneralLastCheckedForUpdate: Long = 0
 	
 	//var ReaderFont: Font
 	companion object {

@@ -14,6 +14,7 @@ import androidx.activity.SystemBarStyle
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
 import androidx.compose.foundation.clickable
+import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -245,7 +246,42 @@ fun MainActivity(navController: NavController?) {
 				}
 			}
 		) {
-			Box (Modifier.padding(it)) {
+			Column (Modifier.padding(it)) {
+				val staleDate = Storage.Settings.GeneralLastCheckedForUpdate + 1209600
+				val currentDate = System.currentTimeMillis() / 1000
+				if ( currentDate > staleDate && Storage.Settings.GeneralShowUpdateReminder) {
+					Row(
+						modifier = Modifier.padding(20.dp, 0.dp),
+						verticalAlignment = Alignment.CenterVertically,
+						horizontalArrangement = Arrangement.SpaceAround) {
+						IconButton(onClick = {
+							Storage.Settings.GeneralLastCheckedForUpdate =
+								(System.currentTimeMillis() / 1000)
+							Storage.SaveSettings()
+						}) {
+							Icon(Icons.Filled.Close, "Defer Checking Update")
+						}
+						Button(
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(5.dp, 10.dp),
+							onClick = {
+								Storage.Settings.GeneralLastCheckedForUpdate =
+									(System.currentTimeMillis() / 1000)
+								Storage.SaveSettings()
+								Navigator.ToWebViewActivity(
+									navController!!,
+									"https://github.com/practicalglitch/appo3/releases",
+									"Current version: v${BuildConfig.VERSION_NAME}"
+								)
+							}
+						) {
+							Text(
+								text = "Tap to check for new updates"
+							)
+						}
+					}
+				}
 				// If Library
 				if (activityState.value == 0) {
 					LazyColumn(

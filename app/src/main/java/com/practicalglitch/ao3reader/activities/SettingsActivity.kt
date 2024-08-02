@@ -268,6 +268,7 @@ fun PopupDialog(
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark Mode")
 fun GeneralSettingsPage(){
 	val statsEnabled = remember { mutableStateOf(Storage.Settings.GeneralStatsEnabled) }
+	val updateReminder = remember { mutableStateOf(Storage.Settings.GeneralShowUpdateReminder) }
 	val openStatsEnabledAlert = remember { mutableStateOf(false) }
 	
 	RederTheme {
@@ -306,6 +307,11 @@ fun GeneralSettingsPage(){
 						statsEnabled.value = true
 						Storage.Settings.GeneralStatsEnabled = true
 					}
+				}
+				SettingSwitch(text = "Show Update Reminder", checked = updateReminder.value) {
+					updateReminder.value = !updateReminder.value
+					Storage.Settings.GeneralShowUpdateReminder = updateReminder.value
+					Storage.SaveSettings()
 				}
 			}
 		}
