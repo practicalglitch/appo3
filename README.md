@@ -20,10 +20,15 @@ AppO3 is fully open source and privacy-respecting. No data is collected, we neve
 
 ## Download
 
-AppO3 is currently in pre-alpha and is not entirely stable. Please report any bugs, and use it at your own risk. You have been warned. It is recommended you make frequent use of back ups (in settings) so that if your install somehow breaks, you can re-import a previous backup.
+AppO3 has no guarantee of stability. Please report any bugs, and use it at your own risk. You have been warned. It is recommended you make frequent use of back ups (in settings) so that if your install somehow breaks, you can re-import a previous backup.
 
 You can download the pre-alpha builds in the [releases section.](https://github.com/practicalglitch/appo3/releases)
 
-AppO3 is currently only available on Github. I may consider uploading to F-Droid or even Google Play Store at a later date.
+AppO3 is currently only available on Github.
 
 (AppO3 is in no way affiliated with the developers of AO3. AppO3 is a standalone project.)
+
+## Preview
+
+| ![appo3_library](https://github.com/user-attachments/assets/25efdc52-a441-4c10-bc8c-9a6af1103ea9) | ![appo3_workinfo](https://github.com/user-attachments/assets/bd296b04-9900-4df4-b0a2-79fb4db68db2) |  ![appo3_chapter](https://github.com/user-attachments/assets/35020bc1-f6bf-4b17-9cd3-b98fcb03e374) |
+|---|---|---|
