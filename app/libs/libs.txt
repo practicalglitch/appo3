@@ -1,4 +1,4 @@
 Please insert in here:
 
-apio3 - built from latest
+apio3-0.2.0.jar
 jsoup-1.17.1.jar
