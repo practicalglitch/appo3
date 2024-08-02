@@ -37,6 +37,7 @@ import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
 import androidx.compose.material3.SnackbarHost
@@ -46,6 +47,7 @@ import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateListOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -61,6 +63,7 @@ import com.practicalglitch.ao3reader.Get
 import com.practicalglitch.ao3reader.Internet
 import com.practicalglitch.ao3reader.Library
 import com.practicalglitch.ao3reader.Save
+import com.practicalglitch.ao3reader.SavedWork
 import com.practicalglitch.ao3reader.Storage
 import com.practicalglitch.ao3reader.activities.composable.FandomCard
 import com.practicalglitch.ao3reader.activities.composable.NewChapterCard
@@ -333,12 +336,28 @@ fun Discovery(
 	}
 	
 	val fandoms = remember { mutableStateListOf<Fandom>() }
-	val filteredList = remember { mutableStateListOf<Fandom>() }
+	val fandomsFilteredList = remember { mutableStateListOf<Fandom>() }
+	
+	val works = remember { mutableStateListOf<SavedWork>() }
+	
+	
 	
 	Column (
 		modifier = Modifier.fillMaxWidth(),
 		horizontalAlignment = Alignment.CenterHorizontally
 	){
+		var searchState by remember { mutableIntStateOf(0) }
+		val titles = listOf("Fandoms", "Works")
+		PrimaryTabRow(selectedTabIndex = searchState) {
+			titles.forEachIndexed { index, title ->
+				androidx.compose.material3.Tab(
+					selected = searchState == index,
+					onClick = { searchState = index },
+					text = { Text(text = title, maxLines = 2, overflow = TextOverflow.Ellipsis) }
+				)
+			}
+		}
+		
 		SearchBar(
 			query = text,
 			onQueryChange = { text = it
@@ -356,12 +375,19 @@ fun Discovery(
 				Save.SaveSearchHistory(searchHistory.toTypedArray())
 				
 				loading.value = true
-				
-				Get.FandomsList(fandoms)
+				if(searchState == 0)
+					Get.FandomsList(fandoms)
+				if(searchState == 1)
+					Internet().Query(it, 1, works)
 			},
 			active = active,
 			onActiveChange = { active = it },
-			placeholder = { Text(text = "Search for fandom...") },
+			placeholder = {
+				if (searchState == 0)
+					Text(text = "Search for fandom...")
+				else
+					Text(text = "Search for work...")
+			},
 			trailingIcon = {
 				if (active)
 					Icon(
@@ -402,42 +428,57 @@ fun Discovery(
 		}
 		
 		if(loading.value) {
-			Text(text = "Downloading fandoms, please note this may take upwards of a minute...")
+			if(searchState == 0)
+				Text(text = "Downloading fandoms, please note this may take upwards of a minute...")
+			else
+				Text(text = "Searching...")
 		}
 		
-		if(fandoms.size != 0){
-			loading.value = false
-			if(query != lastquery) {
-				filteredList.removeIf { true }
-				Log.d("Search", "Starting search...")
-				// TODO: Fuzzy Search
-				// IT WORKS OKAY
-				val queryLower = query.lowercase().filterNot { it.isWhitespace() }
-				val list =
-					fandoms.filter { fandom -> fandom.Name
-						.lowercase(Locale.getDefault())
-						.filterNot { it.isWhitespace() }
-						.contains(queryLower) }
-						.toMutableList()
-				Log.d("Search", "Found ${list.size} matches from ${fandoms.size} fandoms.")
-				list.sortBy { fandom -> fandom.WorksCount }
-				list.reverse()
-				while (list.size > 25)
-					list.removeAt(24)
-				Log.d("Search", "Displaying ${list.size} fandoms...")
-				filteredList.addAll(list)
-				lastquery = query
-			} else {
-				Log.d("Search", "Query same as last. ${query}, ${lastquery}. Skipped")
+		if(searchState == 0) {
+			if (fandoms.size != 0) {
+				loading.value = false
+				if (query != lastquery) {
+					fandomsFilteredList.removeIf { true }
+					Log.d("Search", "Starting search...")
+					// TODO: Fuzzy Search
+					// IT WORKS OKAY
+					val queryLower = query.lowercase().filterNot { it.isWhitespace() }
+					val list =
+						fandoms.filter { fandom ->
+							fandom.Name
+								.lowercase(Locale.getDefault())
+								.filterNot { it.isWhitespace() }
+								.contains(queryLower)
+						}
+							.toMutableList()
+					list.sortBy { fandom -> fandom.WorksCount }
+					list.reverse()
+					while (list.size > 25)
+						list.removeAt(24)
+					fandomsFilteredList.addAll(list)
+					lastquery = query
+				}
+				
+				LazyColumn(
+					modifier = Modifier
+						.padding(vertical = 6.dp)
+				) {
+					items(
+						items = fandomsFilteredList
+					) { fandom -> FandomCard(navController, fandom) }
+				}
 			}
-			
-			LazyColumn(
-				modifier = Modifier
-					.padding(vertical = 6.dp)
-			) {
-				items(
-					items = filteredList
-				) { fandom -> FandomCard(navController, fandom) }
+		} else if (searchState == 1){
+			if (works.size != 0) {
+				loading.value = false;
+				LazyColumn(
+					modifier = Modifier
+						.padding(vertical = 6.dp)
+				) {
+					items(
+						items = works
+					) { work -> LibraryWorkCard(navController, work.Work.Id, true) }
+				}
 			}
 		}
 	}

@@ -53,6 +53,25 @@ class Internet : ComponentActivity() {
 		}
 	}
 	
+	fun Query(
+		query: String,
+		page: Int,
+		out: SnapshotStateList<SavedWork>){
+		Log.d("Internet", "Downloading works of query ${query}, page ${page}")
+		lifecycleScope.launch {
+			withContext(Dispatchers.IO) {
+				val w = ApiO3.Query(query, page)
+				for (work in w) {
+					val sWork = SavedWork()
+					sWork.Work = work
+					sWork.CachedInfoOnly = true
+					Storage.CachedWorks.add(sWork)
+					out.add(sWork)
+				}
+			}
+		}
+	}
+	
 	/**
 	 * Gets metadata of a work + chapter metadata. Does not return chapter contents.
 	 *
