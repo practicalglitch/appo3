@@ -3,22 +3,33 @@ import android.annotation.SuppressLint
 import android.content.res.Configuration
 import android.util.Log
 import androidx.compose.foundation.layout.Column
+import androidx.compose.foundation.layout.ExperimentalLayoutApi
+import androidx.compose.foundation.layout.FlowRow
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.padding
+import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.LazyColumn
 import androidx.compose.foundation.lazy.LazyListState
 import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
+import androidx.compose.material.icons.filled.Done
 import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.Public
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
+import androidx.compose.material3.FilterChip
+import androidx.compose.material3.FilterChipDefaults
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.MutableState
 import androidx.compose.runtime.mutableIntStateOf
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
@@ -86,17 +97,29 @@ fun TagSearchActivity (
 	
 	RederTheme {
 		Surface (modifier = Modifier.fillMaxSize()){
+			
+			val showFilters = remember { mutableStateOf(false)}
+			val filters = remember { mutableStateOf(Filters())}
+			if(showFilters.value) {
+				ModalBottomSheet(
+					onDismissRequest = { showFilters.value = false },
+					sheetState = rememberModalBottomSheetState(),
+					dragHandle = { BottomSheetDefaults.DragHandle() },
+				) {
+					FilterDialogue(filters = filters)
+				}
+			}
+			
 			Column {
 				CenterAlignedTopAppBar(
 					title = {
-						Text("Library", maxLines = 1, overflow = TextOverflow.Ellipsis)
+						Text(name, maxLines = 1, overflow = TextOverflow.Ellipsis)
 					},
 					navigationIcon = {
-						IconButton(onClick = { /*TODO*/ }) {
+						IconButton(onClick = { showFilters.value = true }) {
 							Icon(Icons.Default.FilterList, "Filter")
 						}
 					},
-					//Double check this. What would this button do?
 					actions = {
 						IconButton(onClick = {
 							NavigationData.WebViewActivity_url = "https://archiveofourown.org/tags/${tag!!}/works"
@@ -116,13 +139,95 @@ fun TagSearchActivity (
 					items(
 						items = TagSearchActivity.DisplayedWorks
 					) { work ->
-						
-						LibraryWorkCard(navController, work.Work.Id, true)
+						if(work.isInFilter(filters.value))
+							LibraryWorkCard(navController, work.Work.Id, true)
 					}
 					
 					item { SearchThrobber() }
 				}
 			}
+		}
+	}
+}
+
+fun SavedWork.isInFilter(filter: Filters): Boolean{
+	if(Work.Rating == org.apio3.Types.Work.ValidRatings[0] && !filter.Gen)
+		return false
+	if(Work.Rating == org.apio3.Types.Work.ValidRatings[1] && !filter.Teen)
+		return false
+	// TODO: Change the ordering of valid ratings, what the hell
+	if(Work.Rating == org.apio3.Types.Work.ValidRatings[4] && !filter.Mature)
+		return false
+	if(Work.Rating == org.apio3.Types.Work.ValidRatings[3] && !filter.Explicit)
+		return false
+	if(Work.Rating == org.apio3.Types.Work.ValidRatings[2] && !filter.NotRated)
+		return false
+	return true
+}
+
+
+data class Filters(
+	val Gen: Boolean = true,
+	val Teen: Boolean = true,
+	val Mature: Boolean = true,
+	val Explicit: Boolean = true,
+	val NotRated: Boolean = true
+)
+
+@SuppressLint("UnrememberedMutableState")
+@Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark Mode")
+@Composable
+fun FilterDialoguePreview() {
+	FilterDialogue(filters = mutableStateOf(Filters()))
+}
+
+@Composable
+fun FastFilterChip(name: String, value: Boolean, onClick: () -> Unit) {
+	FilterChip(
+		modifier = Modifier.padding(3.dp, 0.dp),
+		onClick = { onClick.invoke() },
+		label = {
+			Text(name)
+		},
+		selected = value,
+		leadingIcon = if (value) {
+			{
+				Icon(
+					imageVector = Icons.Filled.Done,
+					contentDescription = "Done icon",
+					modifier = Modifier.size(FilterChipDefaults.IconSize)
+				)
+			}
+		} else {
+			null
+		}
+	)
+}
+
+
+@OptIn(ExperimentalLayoutApi::class)
+@Composable
+fun FilterDialogue(filters: MutableState<Filters>){
+	Column(modifier = Modifier.padding(5.dp)) {
+		Text(text = "Content Rating", style = MaterialTheme.typography.titleMedium)
+		
+		FlowRow() {
+			FastFilterChip(name = "General", value = filters.value.Gen) {
+				filters.value = filters.value.copy(Gen = !filters.value.Gen)
+			}
+			FastFilterChip(name = "Teen", value = filters.value.Teen) {
+				filters.value = filters.value.copy(Teen = !filters.value.Teen)
+			}
+			FastFilterChip(name = "Mature", value = filters.value.Mature) {
+				filters.value = filters.value.copy(Mature = !filters.value.Mature)
+			}
+			FastFilterChip(name = "Explicit", value = filters.value.Explicit) {
+				filters.value = filters.value.copy(Explicit = !filters.value.Explicit)
+			}
+			FastFilterChip(name = "No Rating", value = filters.value.NotRated) {
+				filters.value = filters.value.copy(NotRated = !filters.value.NotRated)
+			}
+			
 		}
 	}
 }
