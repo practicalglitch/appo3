@@ -50,10 +50,14 @@ class Get {
 		}
 		
 		fun FandomsList(out: SnapshotStateList<Fandom>) {
-			// Call for a refresh every 72hrs
-			if(Storage.FandomsListTimestamp < (System.currentTimeMillis() / 1000) + 259200 && Storage.FandomsList.size != 0){
+			// Call for a refresh every 72hrs (259200s = 72h)
+			val staleDate = Storage.FandomsListTimestamp + 259200
+			val currentDate = System.currentTimeMillis() / 1000
+			if(staleDate > currentDate && Storage.FandomsList.size != 0){
+				// still not stale
 				out.addAll(Storage.FandomsList)
 			} else {
+				// stale
 				Internet().DownloadAllFandoms(out)
 			}
 			
