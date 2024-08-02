@@ -405,7 +405,7 @@ class Storage {
 		}
 		
 		val FandomsList = mutableListOf<Fandom>()
-		var FandomsListTimestamp: Long = 0
+		var FandomsListTimestamp: Long = Long.MAX_VALUE
 		
 		fun SaveFandomsList(): Boolean {
 			Log.d("Data", "Saving Fandoms List")

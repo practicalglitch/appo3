@@ -51,7 +51,7 @@ class Get {
 		
 		fun FandomsList(out: SnapshotStateList<Fandom>) {
 			// Call for a refresh every 72hrs
-			if(Storage.FandomsListTimestamp < (System.currentTimeMillis() / 1000) + 259200){
+			if(Storage.FandomsListTimestamp < (System.currentTimeMillis() / 1000) + 259200 && Storage.FandomsList.size != 0){
 				out.addAll(Storage.FandomsList)
 			} else {
 				Internet().DownloadAllFandoms(out)
