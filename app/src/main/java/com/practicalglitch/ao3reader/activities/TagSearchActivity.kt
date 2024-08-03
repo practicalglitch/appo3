@@ -39,10 +39,12 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
+import com.practicalglitch.ao3reader.Filters
 import com.practicalglitch.ao3reader.Internet
 import com.practicalglitch.ao3reader.SavedWork
 import com.practicalglitch.ao3reader.activities.nav.NavigationData
 import com.practicalglitch.ao3reader.activities.nav.Screen
+import com.practicalglitch.ao3reader.isInFilter
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
 
 
@@ -150,29 +152,7 @@ fun TagSearchActivity (
 	}
 }
 
-fun SavedWork.isInFilter(filter: Filters): Boolean{
-	if(Work.Rating == org.apio3.Types.Work.ValidRatings[0] && !filter.Gen)
-		return false
-	if(Work.Rating == org.apio3.Types.Work.ValidRatings[1] && !filter.Teen)
-		return false
-	// TODO: Change the ordering of valid ratings, what the hell
-	if(Work.Rating == org.apio3.Types.Work.ValidRatings[4] && !filter.Mature)
-		return false
-	if(Work.Rating == org.apio3.Types.Work.ValidRatings[3] && !filter.Explicit)
-		return false
-	if(Work.Rating == org.apio3.Types.Work.ValidRatings[2] && !filter.NotRated)
-		return false
-	return true
-}
 
-
-data class Filters(
-	val Gen: Boolean = true,
-	val Teen: Boolean = true,
-	val Mature: Boolean = true,
-	val Explicit: Boolean = true,
-	val NotRated: Boolean = true
-)
 
 @SuppressLint("UnrememberedMutableState")
 @Preview(showBackground = true, uiMode = Configuration.UI_MODE_NIGHT_YES, name = "Dark Mode")
