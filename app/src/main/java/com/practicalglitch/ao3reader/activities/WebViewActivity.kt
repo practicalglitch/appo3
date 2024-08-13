@@ -125,7 +125,7 @@ fun WebViewActivity(
 										onDismissRequest = { expanded = false }) {
 										DropdownMenuItem(text = { Text(text = "Refresh") }, onClick = { webView?.reload() })
 										DropdownMenuItem(text = { Text(text = "Open in Browser") }, onClick = {
-											val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+											val browserIntent = Intent(Intent.ACTION_VIEW, Uri.parse(dispUrl))
 											context.startActivity(browserIntent) })
 									}
 								}
