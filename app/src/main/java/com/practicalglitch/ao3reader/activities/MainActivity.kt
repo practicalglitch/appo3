@@ -27,17 +27,21 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material.icons.Icons
 import androidx.compose.material.icons.automirrored.filled.LibraryBooks
 import androidx.compose.material.icons.filled.Close
+import androidx.compose.material.icons.filled.FilterList
 import androidx.compose.material.icons.filled.History
 import androidx.compose.material.icons.filled.Search
 import androidx.compose.material.icons.filled.Settings
 import androidx.compose.material.icons.filled.Update
+import androidx.compose.material3.BottomSheetDefaults
 import androidx.compose.material3.Button
 import androidx.compose.material3.CenterAlignedTopAppBar
 import androidx.compose.material3.ExperimentalMaterial3Api
 import androidx.compose.material3.Icon
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.ModalBottomSheet
 import androidx.compose.material3.NavigationBar
 import androidx.compose.material3.NavigationBarItem
+import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.PrimaryTabRow
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SearchBar
@@ -45,6 +49,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.Surface
 import androidx.compose.material3.Text
+import androidx.compose.material3.rememberModalBottomSheetState
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.getValue
@@ -60,6 +65,7 @@ import androidx.compose.ui.tooling.preview.Preview
 import androidx.compose.ui.unit.dp
 import androidx.navigation.NavController
 import com.practicalglitch.ao3reader.BuildConfig
+import com.practicalglitch.ao3reader.Filters
 import com.practicalglitch.ao3reader.Get
 import com.practicalglitch.ao3reader.Internet
 import com.practicalglitch.ao3reader.Library
@@ -68,17 +74,19 @@ import com.practicalglitch.ao3reader.SavedWork
 import com.practicalglitch.ao3reader.Storage
 import com.practicalglitch.ao3reader.activities.composable.FandomCard
 import com.practicalglitch.ao3reader.activities.composable.NewChapterCard
+import com.practicalglitch.ao3reader.activities.composable.subcomposable.FilterDialogue
 import com.practicalglitch.ao3reader.activities.composable.subcomposable.ShowChangelog
 import com.practicalglitch.ao3reader.activities.nav.Navigation
 import com.practicalglitch.ao3reader.activities.nav.NavigationData
 import com.practicalglitch.ao3reader.activities.nav.Navigator
 import com.practicalglitch.ao3reader.activities.nav.Screen
+import com.practicalglitch.ao3reader.filterFrom
+import com.practicalglitch.ao3reader.isInFilter
 import com.practicalglitch.ao3reader.ui.theme.RederTheme
 import org.apio3.Types.Fandom
 import org.apio3.Types.WorkChapter
 import rememberForeverLazyListState
 import java.io.File
-import java.util.Locale
 
 
 class MainActivityData : ComponentActivity() {
@@ -132,7 +140,10 @@ fun makeSnackbarHost(): SnackbarHostState{
 @SuppressLint("UnusedMaterial3ScaffoldPaddingParameter")
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
-fun MainActivity(navController: NavController?) {
+fun MainActivity(
+	navController: NavController?,
+	preview: Boolean = false
+) {
 	// state 0 -> library
 	// state 1 -> recent
 	// state 2 -> discover
@@ -174,7 +185,7 @@ fun MainActivity(navController: NavController?) {
 	
 	RederTheme {
 		
-		if(Storage.Settings.GeneralLastKnownVersion != BuildConfig.VERSION_CODE)
+		if(Storage.Settings.GeneralLastKnownVersion != BuildConfig.VERSION_CODE && !preview)
 			startupDialogue.value = true
 		
 		// Startup dialogue
@@ -245,8 +256,10 @@ fun MainActivity(navController: NavController?) {
 					)
 				}
 			}
-		) {
-			Column (Modifier.padding(it)) {
+		) { padding ->
+			Column (Modifier.padding(padding)) {
+				
+				// Update check reminder
 				val staleDate = Storage.Settings.GeneralLastCheckedForUpdate + 1209600
 				val currentDate = System.currentTimeMillis() / 1000
 				if ( currentDate > staleDate && Storage.Settings.GeneralShowUpdateReminder) {
@@ -282,8 +295,44 @@ fun MainActivity(navController: NavController?) {
 						}
 					}
 				}
-				// If Library
+				
+				
 				if (activityState.value == 0) {
+					// Library
+					// Searchbar
+					val filterSearch = remember { mutableStateOf("") }
+					val showFilters = remember { mutableStateOf(false) }
+					val filters = remember { mutableStateOf(Filters()) }
+					if(showFilters.value) {
+						ModalBottomSheet(
+							onDismissRequest = { showFilters.value = false },
+							sheetState = rememberModalBottomSheetState(),
+							dragHandle = { BottomSheetDefaults.DragHandle() },
+						) {
+							FilterDialogue(filters = filters, true)
+						}
+					}
+					Row(
+						modifier = Modifier.padding(20.dp, 0.dp),
+						verticalAlignment = Alignment.CenterVertically,
+						horizontalArrangement = Arrangement.SpaceAround) {
+						IconButton(onClick = {
+							showFilters.value = true
+						}) {
+							Icon(Icons.Filled.FilterList, "Filter")
+						}
+						OutlinedTextField(
+							modifier = Modifier
+								.fillMaxWidth()
+								.padding(5.dp, 10.dp),
+							value = filterSearch.value,
+							label = {
+								Text(text = "Search for work...")
+							},
+							onValueChange = { str ->
+								filterSearch.value = str
+							})
+					}
 					LazyColumn(
 						state = rememberForeverLazyListState(key = "Library"),
 						modifier = Modifier
@@ -291,7 +340,13 @@ fun MainActivity(navController: NavController?) {
 					) {
 						items(
 							items = savedWorkIDs
-						) { workId -> LibraryWorkCard(navController, workId, false) }
+						) { id ->
+							val work = Storage.LoadSavedWork(id, true)
+							if(
+								(work.Work.Title.filterFrom(filterSearch.value) ||
+										filterSearch.value == "")
+								&& work.isInFilter(filters.value))
+								LibraryWorkCard(navController, id, false) }
 					}
 				}
 				// If Recents
@@ -478,15 +533,8 @@ fun Discovery(
 					Log.d("Search", "Starting search...")
 					// TODO: Fuzzy Search
 					// IT WORKS OKAY
-					val queryLower = query.lowercase().filterNot { it.isWhitespace() }
 					val list =
-						fandoms.filter { fandom ->
-							fandom.Name
-								.lowercase(Locale.getDefault())
-								.filterNot { it.isWhitespace() }
-								.contains(queryLower)
-						}
-							.toMutableList()
+						fandoms.filter { fandom -> fandom.Name.filterFrom(query) }.toMutableList()
 					list.sortBy { fandom -> fandom.WorksCount }
 					list.reverse()
 					while (list.size > 25)
@@ -540,7 +588,7 @@ fun MainActivityLibraryPreview() {
 	library.quickPopulate()
 	RederTheme {
 		Surface {
-			MainActivity(null)
+			MainActivity(null, true)
 		}
 	}
 }

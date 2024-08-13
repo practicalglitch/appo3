@@ -26,5 +26,37 @@ data class Filters(
 	val Teen: Boolean = true,
 	val Mature: Boolean = true,
 	val Explicit: Boolean = true,
-	val NotRated: Boolean = true
+	val NotRated: Boolean = true,
+	
+	val Sorting: SortingType = SortingType.AddedOrder,
+	val Grouping: GroupingType = GroupingType.Ungrouped
 )
+
+enum class SortingType {
+	Alphabetical,
+	Hits,
+	Kudos,
+	AddedOrder
+}
+
+enum class GroupingType {
+	Ungrouped,
+	PrimaryFandom,
+	Rating
+}
+
+val SortingTypeMap: Map<String, SortingType> = mapOf(
+	Pair("Alphabetical", SortingType.Alphabetical),
+	Pair("Hits", SortingType.Hits),
+	Pair("Kudos", SortingType.Kudos),
+	Pair("Added Order", SortingType.AddedOrder)
+)
+
+val GroupingTypeMap: Map<String, GroupingType> = mapOf(
+	Pair("Ungrouped", GroupingType.Ungrouped),
+	Pair("Rating", GroupingType.Rating),
+	Pair("Primary Fandom", GroupingType.PrimaryFandom)
+)
+
+fun <K, V> Map<K, V>.getKey(value: V) =
+	entries.firstOrNull { it.value == value }?.key
