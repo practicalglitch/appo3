@@ -250,7 +250,7 @@ class Internet : ComponentActivity() {
 							// Add it to it
 							if ((Storage.NewChapters.filter { ch -> ch.ChapterID == onlineChapter.ChapterID }).isEmpty()) {
 								Storage.NewChapters.add(onlineChapter)
-								newWorksList.add(onlineChapter)
+								newWorksList.add(0, onlineChapter)
 								Log.d(
 									"Update",
 									"Found update for ${sWork.Work.Id}, ${sWork.Work.Title}: ${onlineChapter.ChapterID}, ${onlineChapter.Title}"
