@@ -257,6 +257,15 @@ fun BookInfoActivity(
 										textAlign = TextAlign.Left,
 										modifier = Modifier.padding(0.dp, 5.dp)
 									)
+									Text(
+										text = "${"%,d".format(work.value.Work.Hits)} Hits - " +
+												"${"%,d".format(work.value.Work.Kudos)} Kudos - " +
+												"${"%,d".format(work.value.Work.Bookmarks)} Bookmarks - " +
+												"${"%,d".format(work.value.Work.Comments)} Comments ",
+										style = MaterialTheme.typography.labelMedium,
+										textAlign = TextAlign.Left,
+										modifier = Modifier.padding(0.dp, 5.dp)
+									)
 								}
 							}
 							
