@@ -200,6 +200,12 @@ class Storage {
 			work.Work.Id = id
 			
 			
+			if(!FileIO.Exists("work_${id}/top_meta.json")!! ||!FileIO.Exists("work_${id}/bot_meta.json")!! ) {
+				work.Work = null
+				return work
+			}
+			
+			
 			FileIO.ifExists("work_${id}/top_meta.json") { path ->
 				val topjson = FileIO.ReadFromFile(path)
 				val topMeta: WorkTopMeta =
@@ -570,8 +576,10 @@ class Storage {
 
 			if(info.settings)
 				FileIO.ifExists("restore/settings.json") { file ->
-					Storage.Settings = LibraryIO.gson.fromJson(FileIO.ReadFromFile(file),
-						object : TypeToken<HashMap<String, Float>>() {}.type)
+					var txt = FileIO.ReadFromFile(file)
+					Log.d("e", txt!!)
+					Storage.Settings = LibraryIO.gson.fromJson(txt,
+						object : TypeToken<Settings>() {}.type)
 					Storage.SaveSettings()
 				}
 

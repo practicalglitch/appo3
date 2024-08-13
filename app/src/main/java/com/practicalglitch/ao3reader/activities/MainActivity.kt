@@ -342,11 +342,14 @@ fun MainActivity(
 							items = savedWorkIDs
 						) { id ->
 							val work = Storage.LoadSavedWork(id, true)
-							if(
+							if(work.Work == null){
+								LibraryWorkCard(navController, id, false)
+							} else if(
 								(work.Work.Title.filterFrom(filterSearch.value) ||
 										filterSearch.value == "")
 								&& work.isInFilter(filters.value))
 								LibraryWorkCard(navController, id, false) }
+						
 					}
 				}
 				// If Recents
